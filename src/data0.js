@@ -1,0 +1,96 @@
+/* ===== phases (all planned; only phase 0 has lessons so far) ===== */
+phase({name:'Core Concepts',sub:'The vocabulary every other topic builds on.',g:0,sec:'Core Concepts',pre:['How the web works (browser asks, server answers)','Percentages and powers of 10'],intro:'Nine ideas you will use in every design: how to grow, how to stay up, how to keep data balanced across machines, and what you give up when the network breaks.'});
+phase({name:'Networking Fundamentals',sub:'How bytes get from a browser to your servers.',g:0,sec:'Networking Fundamentals',pre:['Phase 0: latency and availability']});
+phase({name:'API Fundamentals',sub:'How services talk, and how to keep them safe.',g:1,sec:'API Fundamentals',pre:['Phase 1: HTTP and DNS']});
+phase({name:'Database Fundamentals',sub:'Storing data, finding it fast, and spreading it out.',g:2,sec:'Database Fundamentals',pre:['Basic SQL (SELECT, JOIN)','Phase 0: availability and consistency']});
+phase({name:'Caching Fundamentals',sub:'Doing less work by remembering answers.',g:2,sec:'Caching Fundamentals',pre:['Phase 3: indexes and replication help']});
+phase({name:'Asynchronous Communication',sub:'Queues, topics and event streams.',g:1,sec:'Asynchronous Communication',pre:['Phase 2: APIs']});
+phase({name:'Distributed Systems and Microservices',sub:'Many machines that must agree and survive.',g:3,sec:'Distributed System and Microservices',pre:['Phase 0','Phase 3: replication','Phase 5: queues']});
+phase({name:'Architectural Patterns',sub:'Shapes a whole system can take.',g:3,sec:'Architectural Patterns',pre:['Phases 1 to 6']});
+phase({name:'System Design Tradeoffs',sub:'Every choice costs something. Learn the price list.',g:4,sec:'System Design Tradeoffs',pre:['Phases 0 to 7']});
+phase({name:'Interview Framework',sub:'A repeatable way to answer any design question.',g:5,sec:'How to Answer a System Design Interview Problem',pre:['Phases 0 to 8']});
+phase({name:'Interview Problems: Easy',sub:'Ten warm-ups that use one or two ideas each.',g:5,sec:'System Design Interview Problems',grp:'Easy',pre:['Phases 0 to 9']});
+phase({name:'Interview Problems: Medium',sub:'Twenty-three product-style designs.',g:5,sec:'System Design Interview Problems',grp:'Medium',pre:['Phases 0 to 9','Easy problems']});
+phase({name:'Interview Problems: Hard',sub:'Twelve designs with real scale or hard coordination.',g:5,sec:'System Design Interview Problems',grp:'Hard',pre:['Phases 0 to 9','Medium problems']});
+
+/* ===== Phase 0 lessons ===== */
+lesson(0,{key:'Scalability',short:'Scalability',tag:'Core concept 1 of 9',title:'Scalability: handling more load without falling over',
+  lead:'A system is scalable if it keeps working well as traffic, data or users grow. There are two ways to grow: make one machine bigger (scale up, also called vertical) or add more machines (scale out, also called horizontal).',
+  more:['Scaling up is the easy first move: no code changes, just a bigger box. But machines have a maximum size and prices climb steeply near the top. Scaling out has no hard ceiling and gives you spare capacity if one machine dies, but your app now has to work across many machines.'],
+  demo:'scale',takeaway:'Scale up first because it is simple. Scale out when you run out of bigger machines or need redundancy. Scaling out only works if servers are interchangeable.',
+  pre:[],
+  quiz:[{q:'Traffic doubles and your single biggest available machine is already at 90% load. What is your next move?',o:['Buy an even bigger machine','Add more machines behind a load balancer','Turn off the slowest feature'],a:1,why:'You have hit the vertical ceiling, so the remaining path is to add machines.',hint:'There is a limit to how big one machine can get.'},
+        {q:'Which is a real benefit of scaling out over scaling up?',o:['It needs no change to the application','Losing one machine does not take everything down','It is always cheaper'],a:1,why:'Several machines give you redundancy. The cost is more moving parts, and it is not always cheaper.'}],
+  terms:[['Vertical scaling','Bigger machine: more CPU, memory, disk.'],['Horizontal scaling','More machines sharing the work.'],['Load balancer','Spreads incoming requests across machines.']]});
+
+lesson(0,{key:'Availability',short:'Availability',tag:'Core concept 2 of 9',title:'Availability: the percentage of time you are up',
+  lead:'Availability is how much of the time a system can serve requests, usually written as a percentage. People talk in nines: 99.9% is three nines, 99.99% is four nines.',
+  more:['Each extra nine cuts allowed downtime by ten times. 99.9% allows almost nine hours a year, 99.99% allows under an hour, 99.999% allows about five minutes. And parts chained together multiply their availability, so a long chain is less available than any single part.'],
+  demo:'avail',takeaway:'Know the downtime for each nine. Chains of dependencies lower availability, and redundancy raises it.',
+  pre:['Scalability'],vid:'52kjR5SVUlg',
+  quiz:[{q:'Roughly how much downtime per year does 99.99% availability allow?',o:['About 9 hours','About 52 minutes','About 5 minutes'],a:1,why:'0.01% of a year is about 52.6 minutes. 99.9% is about 8.8 hours and 99.999% about 5.3 minutes.',hint:'Each extra nine divides downtime by ten.'},
+        {q:'Three services each at 99.9% are all required for a request to work. What is the combined availability?',o:['Exactly 99.9%','About 99.7%','About 99.99%'],a:1,why:'You multiply: 0.999 x 0.999 x 0.999 is about 0.997. Dependencies in a chain make the total worse.'}],
+  terms:[['Nines','Shorthand for availability: 3 nines is 99.9%.'],['SLA','The uptime promise in a contract.'],['Redundancy','Spare copies so one failure is not an outage.']]});
+
+lesson(0,{key:'Reliability',short:'Reliability',tag:'Core concept 3 of 9',title:'Reliability: doing the right thing, consistently',
+  lead:'Reliability means the system gives correct results over time, even when parts fail or users do odd things. It is related to availability but not the same: a system that is up but returns wrong answers is available and not reliable.',
+  more:['You build reliability with redundancy, retries, timeouts, validation, backups and good monitoring. The catch is that every one of these has side effects. Retries add load, and retrying a payment can charge twice if the action is not safe to repeat.'],
+  demo:'reliab',takeaway:'Reliable systems keep returning correct results through failure. Retries help but add load and need safe, repeatable operations.',
+  pre:['Availability'],vid:'52kjR5SVUlg',
+  quiz:[{q:'A service is up 100% of the time but sometimes returns stale prices. What is true?',o:['It is highly available but not fully reliable','It is neither available nor reliable','It is reliable but not available'],a:0,why:'It answers every request (available) but not always correctly (not reliable).'},
+        {q:'Why can blind retries make a payment system less reliable?',o:['Retries never help','The same charge can be applied twice','Retries slow down the network permanently'],a:1,why:'If the first attempt actually succeeded but the reply got lost, a retry repeats the action. The fix is idempotency, covered in the API phase.',hint:'What if the reply was lost, not the request?'}],
+  terms:[['Retry','Sending the same request again after a failure.'],['Timeout','Giving up on a call after a set wait.']]});
+
+lesson(0,{key:'SPOF',short:'SPOF',tag:'Core concept 4 of 9',title:'Single point of failure (SPOF)',
+  lead:'A single point of failure is any one part whose failure takes the whole system down. It can be a server, a database, a network link, a config file, or even one person who knows the password.',
+  more:['You find them by walking a request through the system and asking: if this box dies, what happens? You remove them by running at least two of anything important and making sure traffic can move between them. Watch out for hidden ones: a second app server does not help if both talk to a single database.'],
+  demo:'spof',takeaway:'Walk the request path and ask what happens if each part dies. Two of everything on the path removes the single points.',
+  pre:['Availability'],vid:'Iy2YqgjXtRM',
+  quiz:[{q:'You run 10 app servers but one database. Is there a SPOF?',o:['No, 10 servers is plenty','Yes, the database','Yes, but only if the servers are in one rack'],a:1,why:'All 10 servers depend on the one database, so its failure stops everything.'},
+        {q:'You add a second load balancer in front of your servers. What new problem do you need to solve?',o:['Deciding which load balancer users reach, and failing over between them','Nothing, it is automatic','Removing the app servers'],a:0,why:'Redundant parts only help if traffic can move to the survivor, so you need a way to switch, for example shared addresses or DNS.'}],
+  terms:[['Redundancy','Running more than one copy of a part.'],['Blast radius','How much breaks when one part fails.']]});
+
+lesson(0,{key:'Latency vs Throughput vs Bandwidth',short:'Latency vs Throughput',tag:'Core concept 5 of 9',title:'Latency vs throughput vs bandwidth',
+  lead:'Latency is the time one request takes. Bandwidth is the maximum amount of data the connection can carry per second. Throughput is how much work actually gets done per second.',
+  more:['Picture a pipe. Bandwidth is how wide it is, latency is how long it is, and throughput is how much water actually comes out per second. A wide pipe does not make a single trip faster, and a short trip does not mean you can move a lot at once.'],
+  demo:'lat',takeaway:'Many tiny calls are limited by latency. One huge download is limited by bandwidth. To raise throughput for small calls, overlap them.',
+  pre:['Scalability'],vid:'aq8KC7NLaBw',
+  quiz:[{q:'You fetch 1,000 tiny records one after another across the ocean (200 ms round trip). Which upgrade helps most?',o:['Double the bandwidth','Send many requests at the same time or batch them','Compress the responses'],a:1,why:'Each trip costs about 200 ms regardless of size, so overlapping or batching cuts the total time.'},
+        {q:'Which statement is correct?',o:['Higher bandwidth always means lower latency','Throughput can never exceed bandwidth','Latency and throughput are the same thing'],a:1,why:'Bandwidth is the ceiling. Throughput is what you really get, and it is at or below it.'}],
+  terms:[['Round trip time (RTT)','Time for a request to go out and the reply to come back.'],['Throughput','Work completed per second.']]});
+
+lesson(0,{key:'Consistent Hashing',short:'Consistent Hashing',tag:'Core concept 6 of 9',title:'Consistent hashing: adding servers without a big reshuffle',
+  lead:'When data or traffic is split across servers using "hash(key) mod N", changing N moves almost every key. That is painful for caches and databases. Consistent hashing places both servers and keys on a ring, and each key goes to the next server clockwise.',
+  more:['Adding a server only takes keys from its neighbour, and removing a server only hands its keys to the next one. In practice each server appears many times on the ring (virtual nodes) so the split is even, and bigger machines can be given more points.'],
+  demo:'ring',takeaway:'Use consistent hashing when servers come and go. Only about 1/N of keys move, and virtual nodes keep the load even.',
+  pre:['Scalability'],vid:'_PtlQY59_8c',
+  quiz:[{q:'With "hash mod N" you go from 4 servers to 5. Roughly what fraction of keys change server?',o:['About 20%','About 80%','Almost none'],a:1,why:'Most keys land on a different remainder when N changes, so around four in five move. Consistent hashing moves about one in five.',hint:'Compare how many keys keep the same remainder.'},
+        {q:'What do virtual nodes fix?',o:['Uneven load caused by random placement on the ring','Slow hash functions','Network partitions'],a:0,why:'Many small points per server average out, so each server gets close to its fair share.'}],
+  terms:[['Hash ring','Hash values arranged in a circle.'],['Virtual node','One server placed at many points on the ring.']]});
+
+lesson(0,{key:'CAP Theorem',short:'CAP Theorem',tag:'Core concept 7 of 9',title:'CAP theorem: what happens when the network breaks',
+  lead:'CAP says that when a network partition splits a distributed data store, you can keep either consistency (every read sees the latest write) or availability (every request gets an answer), not both.',
+  more:['Partitions are not optional on real networks, so the question is what to do during one. A CP system refuses requests it cannot answer correctly. An AP system answers anyway and may return stale data, then repairs differences later. Without a partition you can have both, and many systems also trade latency for consistency even when everything is healthy.'],
+  demo:'cap',takeaway:'During a partition, choose: error or stale. Pick by the cost of being wrong. Bank balances lean CP; social feeds lean AP.',
+  pre:['Availability','Reliability'],vid:'DpzMkfhV4Tg',
+  quiz:[{q:'A network partition happens. Your system keeps accepting writes on both sides. Which did you choose?',o:['Consistency','Availability','Neither'],a:1,why:'Both sides answer, so it is available. The sides may disagree, so consistency is given up until they sync.'},
+        {q:'Which system is the better fit for AP?',o:['Account balance for payments','Like counts on posts','Seat inventory for the last ticket'],a:1,why:'A like count that is briefly off hurts nobody. Balances and the last seat need one correct answer.'}],
+  terms:[['Partition','Parts of the system cannot talk to each other.'],['Stale read','Getting an older value than the latest write.']]});
+
+lesson(0,{key:'Failover',short:'Failover',tag:'Core concept 8 of 9',title:'Failover: switching to the spare',
+  lead:'Failover moves work from a failed component to a standby. In active-passive, the standby sits idle and is promoted when the primary dies. In active-active, both serve traffic, so losing one just means the other takes it all.',
+  more:['The time you are down is the time to notice, plus the time to switch. A short detection timeout speeds recovery but risks false alarms on a slow network, and a false alarm with two nodes both thinking they are primary (split brain) can corrupt data.'],
+  demo:'failover',takeaway:'Failover time is detection plus switching. Active-active is faster but needs spare capacity on every node.',
+  pre:['SPOF'],vid:'Zgy1miPsTNs',
+  quiz:[{q:'What is the main cost of active-active compared with active-passive?',o:['Slower failover','Each node must have room to absorb the other\'s traffic','No redundancy at all'],a:1,why:'If two nodes each run at 80% and one dies, the survivor needs 160%. You must keep spare headroom.'},
+        {q:'You shorten the failure-detection timeout from 10 s to 1 s. What risk goes up?',o:['False failovers on a slow but healthy node','Longer recovery','Higher bandwidth cost'],a:0,why:'A node that is merely slow can be declared dead and replaced while still running.'}],
+  terms:[['Active-passive','Spare waits idle until needed.'],['Split brain','Two nodes both believe they are the primary.']]});
+
+lesson(0,{key:'Fault Tolerance',short:'Fault Tolerance',tag:'Core concept 9 of 9',title:'Fault tolerance: keep going through failure',
+  lead:'A fault-tolerant system keeps operating, ideally without users noticing, when components fail. High availability aims to be up almost always; fault tolerance aims for no interruption at all, which usually costs more.',
+  more:['A common technique is replication with a majority rule: with 5 copies you can lose 2 and still have a majority that agrees. That is why clusters use odd sizes: 4 copies tolerate no more failures than 3.'],
+  demo:'ft',takeaway:'Fault tolerance comes from redundancy plus a rule for agreement. Use odd cluster sizes and size the cluster for the failures you must survive.',
+  pre:['Failover','SPOF'],vid:'VcJNu68WKrs',
+  quiz:[{q:'How many replicas can fail in a 5-node majority-rule cluster before it stops?',o:['1','2','3'],a:1,why:'You need 3 of 5. Lose 2 and 3 remain, lose 3 and only 2 remain.'},
+        {q:'Why do clusters usually have an odd number of nodes?',o:['Odd numbers are faster','An even size tolerates no more failures than the odd size below it','The network requires it'],a:1,why:'A majority of 4 is 3, the same failures tolerated as a cluster of 3, but with one more machine to pay for.'}],
+  terms:[['Quorum','The minimum number of nodes that must agree.'],['Replica','A copy of a service or its data.']]});

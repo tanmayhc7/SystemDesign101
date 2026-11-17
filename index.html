@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>System Design From Scratch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,800..900&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{color-scheme:light;
+  --bg:#E8EDF1; --bg2:#DCE4EA; --surface:#FFFFFF; --well:#E3EAF0; --ink:#0E1B2E; --ink2:#41516A; --line:#C0CDD9; --grout:rgba(14,27,46,.07);
+  --accent:#1747C7; --accent-deep:#0F2F8F; --on-accent:#FFFFFF; --accent-soft:#DCE6FB; --ring:#0E1B2E;
+  --go:#106B36; --go-soft:#D9F1E2; --bad:#B3261E; --bad-soft:#FBE1DE; --warn:#8A5200; --warn-soft:#FFEBC2; --on-fill:#FFFFFF;
+  --shadow:rgba(14,27,46,.35); --ease:cubic-bezier(.16,1,.3,1);
+  --f-display:'Archivo','Arial Narrow','Helvetica Neue',Arial,sans-serif;
+  --f-body:'Atkinson Hyperlegible Next','Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --l0:#D9381E;--t0:#FFFFFF;--l1:#B45309;--t1:#FFFFFF;--l2:#8A6A00;--t2:#FFFFFF;--l3:#4D7C0F;--t3:#FFFFFF;--l4:#0B7A5E;--t4:#FFFFFF;--l5:#0B7285;--t5:#FFFFFF;--l6:#1864AB;--t6:#FFFFFF;--l7:#3B5BDB;--t7:#FFFFFF;--l8:#862E9C;--t8:#FFFFFF;--l9:#C2255C;--t9:#FFFFFF;--l10:#E64980;--t10:#0B1424;--l11:#A61E4D;--t11:#FFFFFF;--l12:#7A1538;--t12:#FFFFFF;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#0C1626; --bg2:#101E33; --surface:#13243B; --well:#0A1322; --ink:#EAF0F8; --ink2:#A9B8CD; --line:#2A405E; --grout:rgba(234,240,248,.055);
+  --accent:#FFD43B; --accent-deep:#B8940A; --on-accent:#1A1400; --accent-soft:#3A3411; --ring:#FFFFFF;
+  --go:#5BD68B; --go-soft:#173A29; --bad:#FF8A80; --bad-soft:#4A2123; --warn:#FFC24D; --warn-soft:#3D3212; --on-fill:#0B1424; --shadow:rgba(0,0,0,.7);
+  --l0:#FF6B57;--t0:#0B1424;--l1:#FFA94D;--t1:#0B1424;--l2:#FFD43B;--t2:#0B1424;--l3:#94D82D;--t3:#0B1424;--l4:#38D9A9;--t4:#0B1424;--l5:#3BC9DB;--t5:#0B1424;--l6:#4DABF7;--t6:#0B1424;--l7:#748FFC;--t7:#0B1424;--l8:#DA77F2;--t8:#0B1424;--l9:#F783AC;--t9:#0B1424;--l10:#FFC9D9;--t10:#0B1424;--l11:#F06595;--t11:#0B1424;--l12:#C2255C;--t12:#FFFFFF;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#0C1626; --bg2:#101E33; --surface:#13243B; --well:#0A1322; --ink:#EAF0F8; --ink2:#A9B8CD; --line:#2A405E; --grout:rgba(234,240,248,.055);
+  --accent:#FFD43B; --accent-deep:#B8940A; --on-accent:#1A1400; --accent-soft:#3A3411; --ring:#FFFFFF;
+  --go:#5BD68B; --go-soft:#173A29; --bad:#FF8A80; --bad-soft:#4A2123; --warn:#FFC24D; --warn-soft:#3D3212; --on-fill:#0B1424; --shadow:rgba(0,0,0,.7);
+  --l0:#FF6B57;--t0:#0B1424;--l1:#FFA94D;--t1:#0B1424;--l2:#FFD43B;--t2:#0B1424;--l3:#94D82D;--t3:#0B1424;--l4:#38D9A9;--t4:#0B1424;--l5:#3BC9DB;--t5:#0B1424;--l6:#4DABF7;--t6:#0B1424;--l7:#748FFC;--t7:#0B1424;--l8:#DA77F2;--t8:#0B1424;--l9:#F783AC;--t9:#0B1424;--l10:#FFC9D9;--t10:#0B1424;--l11:#F06595;--t11:#0B1424;--l12:#C2255C;--t12:#FFFFFF;}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;accent-color:var(--accent);scrollbar-color:var(--line) var(--bg)}
+::selection{background:var(--accent);color:var(--on-accent)}
+body{margin:0;background-color:var(--bg);color:var(--ink);font:400 17px/1.65 var(--f-body);padding-block:14px 64px;caret-color:var(--accent);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background-image:var(--tile);background-size:64px 32px}
+:root{--tile:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='32'%3E%3Cpath d='M0 .5H64M0 16.5H64M.5 0V16M32.5 16V32' stroke='%23808fa3' stroke-opacity='.12' fill='none'/%3E%3C/svg%3E")}
+.wrap{max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:30px;position:relative}
+a{color:var(--accent);text-underline-offset:.22em;text-decoration-thickness:1.5px}
+:focus-visible{outline:3px solid var(--ring);outline-offset:3px;border-radius:6px}
+h1,h2,h3,h4{font-family:var(--f-display);font-stretch:112%;font-weight:800;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-0.012em}
+h1{font-size:clamp(2.2rem,5.4vw,4.1rem)} h2{font-size:clamp(1.65rem,3.4vw,2.35rem)} h3{font-size:1.2rem;font-weight:700} h4{font-size:1rem;font-weight:700}
+p{margin:0;text-wrap:pretty}
+.mono{font-family:var(--f-mono)}
+.readout,.ctl output,.cell,.log{font-variant-numeric:tabular-nums}
+/* masthead */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 10px;border-bottom:2px solid var(--line)}
+.brand{display:flex;gap:10px;align-items:center;color:var(--ink);text-decoration:none;font:800 1.15rem var(--f-display);font-stretch:118%;letter-spacing:-.01em}
+.brand svg{width:34px;height:34px;flex:none}
+.stats,.nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{font:600 14px var(--f-body);padding:7px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-variant-numeric:tabular-nums;text-decoration:none;cursor:pointer;min-height:36px;display:inline-flex;align-items:center}
+a.pill:hover,button.pill:hover{border-color:var(--accent);background:var(--accent-soft)}
+.pill.xp{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.btn{font:700 15px var(--f-body);padding:10px 18px;border-radius:10px;border:0;background:var(--accent);color:var(--on-accent);
+  box-shadow:0 8px 16px -10px var(--shadow),inset 0 -2px 0 rgba(0,0,0,.18);cursor:pointer;min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;transition:transform .18s var(--ease),filter .18s}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn:active{transform:translateY(1px);box-shadow:0 2px 4px -2px var(--shadow)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;filter:none}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:0 6px 12px -10px var(--shadow)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.ghost.on{background:var(--accent-soft);border-color:var(--accent)}
+.btn.danger{background:var(--bad);color:var(--on-fill)}
+.btn.small{min-height:38px;padding:6px 14px;font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+/* panels, signs */
+.panel{--lc:var(--accent);background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:34px 32px 30px;display:flex;flex-direction:column;gap:24px;min-width:0;position:relative;overflow:hidden;box-shadow:0 24px 40px -34px var(--shadow)}
+.panel::before{content:"";position:absolute;inset:0 0 auto 0;height:8px;background:var(--lc)}
+.panel>p.lead,.panel>.takeaway,.panel>.deep{max-width:72ch}
+.crumbs{font-size:.9rem;color:var(--ink2);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.crumbs a{color:var(--ink2)}
+.sign{display:flex;gap:14px;align-items:center}
+.roundel{flex:none;width:44px;height:44px;border-radius:50%;background:var(--lc);color:var(--lt);display:grid;place-items:center;font:800 1.2rem var(--f-display);font-stretch:112%;box-shadow:0 0 0 4px var(--surface),0 0 0 6px var(--lc)}
+.tag{font-size:.92rem;color:var(--ink2);margin-top:-12px}
+.lead{font-size:1.1rem}
+.demo{background:var(--well);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.demo svg{display:block;width:100%;height:auto;background:var(--surface);border-radius:10px;border:1px solid var(--line)}
+.note{font-size:.9rem;color:var(--ink2)}
+.takeaway{padding:14px 18px;border-radius:12px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.ctl{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr) 84px;gap:12px;align-items:center;font-size:.95rem}
+.ctl input[type=range]{width:100%;min-height:28px}
+.ctl output{font:500 14px var(--f-mono);text-align:right}
+.readout{font:500 14px/1.65 var(--f-mono);color:var(--ink);overflow-wrap:anywhere;white-space:pre-line}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0;color:var(--ink);font:inherit;transition:border-color .18s,transform .18s var(--ease)}
+button.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card.hot{border-color:var(--bad);background:var(--bad-soft)}
+.card.ok{border-color:var(--go);background:var(--go-soft)}
+.card.dim{opacity:.55}
+.card h4{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.card h4 span{font:500 13px var(--f-mono);color:var(--ink2)}
+.meter{height:12px;background:var(--well);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.meter .fill{height:100%;background:var(--lc,var(--accent));border-radius:999px;transition:width .5s var(--ease)}
+.meter .fill.bad{background:var(--bad)} .meter .fill.go{background:var(--go)} .meter .fill.warn{background:var(--warn)}
+.result{font-size:1.1rem;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 14px var(--f-body);padding:6px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);cursor:pointer;color:var(--ink);min-height:36px;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.chip.ok{background:var(--go-soft);border-color:var(--go)} .chip.bad{background:var(--bad-soft);border-color:var(--bad)}
+a.chip::before{content:"";width:10px;height:10px;border-radius:50%;border:2.5px solid var(--ink2);flex:none;background:var(--surface)}
+a.chip.ok::before{background:var(--go);border-color:var(--go)}
+.badge{font:700 12px var(--f-body);padding:3px 10px;border-radius:999px;background:var(--lc,var(--accent-soft));color:var(--lt,var(--ink));white-space:nowrap}
+.badge.bad{background:var(--bad-soft);color:var(--bad)} .badge.go{background:var(--go-soft);color:var(--go)} .badge.warn{background:var(--warn-soft);color:var(--warn)}
+.log{font:500 13px/1.55 var(--f-mono);background:var(--surface);border-radius:10px;padding:10px 12px;max-height:200px;overflow:auto;display:flex;flex-direction:column;gap:2px;border:1px solid var(--line)}
+.log div.ok{color:var(--go)} .log div.bad{color:var(--bad)} .log div.dim{color:var(--ink2)}
+table.t{border-collapse:collapse;width:100%;font-size:.93rem;background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+table.t th,table.t td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.t th{background:var(--well);font-weight:700}
+.cell{display:inline-block;min-width:28px;padding:2px 6px;border-radius:6px;text-align:center;font:500 12px var(--f-mono);background:var(--surface);border:1px solid var(--line)}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+/* quiz */
+.quiz{display:flex;flex-direction:column;gap:16px}
+.q{background:var(--well);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.q .opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;font:600 15.5px var(--f-body);padding:11px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:46px;transition:border-color .15s,transform .18s var(--ease)}
+.opt:hover{border-color:var(--accent);transform:translateX(3px)}
+.opt.right{background:var(--go-soft);border-color:var(--go)} .opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt.right::after{content:"  correct"} .opt.wrong::after{content:"  not this one"}
+.opt.right::after,.opt.wrong::after{font-weight:500;font-size:.85em;color:var(--ink2)}
+.why{font-size:.96rem;color:var(--ink2)}
+.done-banner{background:var(--go-soft);color:var(--go);border:1px solid var(--go);border-radius:12px;padding:12px 16px;font-weight:700;animation:pop .6s var(--ease)}
+@keyframes pop{from{transform:scale(.97);opacity:.4}to{transform:none;opacity:1}}
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:end;padding:26px 0 4px}
+.hero h1{max-width:13ch}
+.hero .sub{display:flex;flex-direction:column;gap:16px}
+.hero p{color:var(--ink2);font-size:1.1rem;max-width:56ch}
+.search{font:500 16px var(--f-body);padding:12px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:100%;max-width:520px;min-height:48px}
+.search::placeholder{color:var(--ink2)}
+.mapwrap{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px 14px 4px;box-shadow:0 30px 50px -40px var(--shadow);overflow-x:auto}
+.map{display:block;width:100%;min-width:760px;height:auto}
+.map text{font-family:var(--f-body)}
+.map .ln{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:9}
+.map .ln.draw{stroke-dasharray:var(--len);stroke-dashoffset:0;animation:draw 1.5s var(--ease) both;animation-delay:calc(var(--d)*90ms)}
+.map .ln.plan{stroke-width:3;opacity:.35}
+@keyframes draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+.map .st{cursor:pointer}
+.map .st circle{fill:var(--surface);stroke-width:5;transition:r .18s var(--ease)}
+.map .st.done circle{fill:var(--c)}
+.map .st.plan circle{stroke-width:2.5;cursor:default;opacity:.55}
+.map .st:hover circle,.map .st:focus-visible circle{r:11}
+.map .st.pop{animation:stpop .6s var(--ease) both;animation-delay:calc(var(--d)*90ms + 700ms)}
+@keyframes stpop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+.map .st{transform-box:fill-box;transform-origin:center}
+.map .nm{font-weight:700;font-size:13.5px;fill:var(--ink)} .map .cnt{font-size:12px;fill:var(--ink2);font-variant-numeric:tabular-nums}
+.map .tip{pointer-events:none;font-weight:700;font-size:13px;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:5px;stroke-linejoin:round}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.lg{--lc:var(--l0);display:flex;gap:14px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink);transition:transform .2s var(--ease),border-color .2s;min-width:0}
+.lg:hover{transform:translateY(-2px);border-color:var(--lc)}
+.lg .roundel{width:38px;height:38px;font-size:1rem;box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--lc)}
+.lg .tx{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.lg b{font:700 .98rem var(--f-display);font-stretch:108%}
+.lg .cnt{font-size:.82rem;color:var(--ink2);font-variant-numeric:tabular-nums}
+/* stations lists */
+.lessons{display:flex;flex-direction:column;gap:10px}
+.lessons.line{position:relative;gap:6px;padding-left:34px}
+.lessons.line::before{content:"";position:absolute;left:11px;top:22px;bottom:22px;width:8px;border-radius:4px;background:var(--lc)}
+.lrow{--lc:var(--accent);position:relative;display:flex;gap:14px;align-items:center;padding:13px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink);min-width:0;transition:border-color .18s,transform .2s var(--ease)}
+.lrow:hover{border-color:var(--lc);transform:translateX(3px)}
+.lrow .dot{position:absolute;left:-31px;top:50%;margin-top:-11px;width:22px;height:22px;border-radius:50%;background:var(--surface);border:5px solid var(--lc);display:grid;place-items:center;color:var(--lt);font:800 13px var(--f-body)}
+.lessons:not(.line) .lrow .dot{position:static;margin:0;flex:none}
+.lrow.done .dot{background:var(--lc)}
+.lrow .tx{display:flex;flex-direction:column;min-width:0}
+.lrow .tx b{font-weight:700} .lrow .tx span{font-size:.88rem;color:var(--ink2)}
+.lrow .lv{margin-left:auto;flex:none}
+/* station rail on lesson page */
+.rail{display:flex;align-items:center;gap:0;overflow-x:auto;padding:22px 10px 20px;margin:-10px 0 -8px}
+.rail a{position:relative;flex:1 0 34px;height:22px;display:flex;align-items:center;justify-content:center;text-decoration:none;min-width:34px}
+.rail a::before{content:"";position:absolute;left:0;right:0;top:50%;height:7px;margin-top:-3.5px;background:var(--lc)}
+.rail a:first-child::before{left:50%} .rail a:last-child::before{right:50%}
+.rail a i{position:relative;width:20px;height:20px;border-radius:50%;background:var(--surface);border:5px solid var(--lc);transition:transform .2s var(--ease)}
+.rail a.done i{background:var(--lc)}
+.rail a.cur i{transform:scale(1.55);box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--ink)}
+.rail a:hover i{transform:scale(1.35)}
+/* misc */
+.nextprev{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lib{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.lib a.item{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:12px;background:var(--well);border:1px solid var(--line);text-decoration:none;color:var(--ink);transition:border-color .18s}
+.lib a.item:hover{border-color:var(--accent)}
+.lib a.item span{font-size:.88rem;color:var(--ink2)}
+.stepper svg text{font-family:var(--f-body)}
+.fade{animation:fade .45s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.deep{display:flex;flex-direction:column;gap:20px}
+.dsec{display:flex;flex-direction:column;gap:8px}
+.dsec ul,.iqd ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px}
+.iq{display:flex;flex-direction:column;gap:10px;max-width:84ch}
+.iqd{background:var(--well);border:1px solid var(--line);border-radius:12px;padding:13px 16px}
+.iqd summary{cursor:pointer;font-weight:700;line-height:1.5}
+.iqd[open] summary{margin-bottom:10px}
+.iqd textarea{width:100%;font:16px var(--f-body);border-radius:10px;border:1.5px solid var(--line);padding:10px;background:var(--surface);color:var(--ink);margin-bottom:10px}
+.iqd>b{display:block;margin-top:8px}
+@media (max-width:860px){.hero{grid-template-columns:1fr}.mapwrap{display:none}}
+@media (min-width:861px){.legend{margin-top:-6px}}
+@media (max-width:640px){.panel{padding:26px 18px 22px}.ctl{grid-template-columns:1fr 74px}.ctl label{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head>
+<body><main id="app"></main>
+<script>
+const REPO=[{"name": "Core Concepts", "items": [{"t": "Scalability", "u": "https://algomaster.io/learn/system-design/scalability"}, {"t": "Availability", "u": "https://algomaster.io/learn/system-design/availability"}, {"t": "Reliability", "u": "https://algomaster.io/learn/system-design/reliability"}, {"t": "SPOF", "u": "https://algomaster.io/learn/system-design/single-point-of-failure-spof"}, {"t": "Latency vs Throughput vs Bandwidth", "u": "https://algomaster.io/learn/system-design/latency-vs-throughput"}, {"t": "Consistent Hashing", "u": "https://algomaster.io/learn/system-design/consistent-hashing"}, {"t": "CAP Theorem", "u": "https://algomaster.io/learn/system-design/cap-theorem"}, {"t": "Failover", "u": "https://www.druva.com/glossary/what-is-a-failover-definition-and-related-faqs"}, {"t": "Fault Tolerance", "u": "https://www.cockroachlabs.com/blog/what-is-fault-tolerance/"}], "groups": {}}, {"name": "Networking Fundamentals", "items": [{"t": "OSI Model", "u": "https://algomaster.io/learn/system-design/osi"}, {"t": "IP Addresses", "u": "https://algomaster.io/learn/system-design/ip-address"}, {"t": "Domain Name System (DNS)", "u": "https://blog.algomaster.io/p/how-dns-actually-works"}, {"t": "Proxy vs Reverse Proxy", "u": "https://blog.algomaster.io/p/proxy-vs-reverse-proxy-explained"}, {"t": "HTTP/HTTPS", "u": "https://algomaster.io/learn/system-design/http-https"}, {"t": "TCP vs UDP", "u": "https://algomaster.io/learn/system-design/tcp-vs-udp"}, {"t": "Load Balancing", "u": "https://blog.algomaster.io/p/load-balancing-algorithms-explained-with-code"}, {"t": "Checksums", "u": "https://algomaster.io/learn/system-design/checksums"}], "groups": {}}, {"name": "API Fundamentals", "items": [{"t": "APIs", "u": "https://algomaster.io/learn/system-design/what-is-an-api"}, {"t": "API Gateway", "u": "https://blog.algomaster.io/p/what-is-an-api-gateway"}, {"t": "REST vs GraphQL", "u": "https://blog.algomaster.io/p/rest-vs-graphql"}, {"t": "WebSockets", "u": "https://blog.algomaster.io/p/websockets"}, {"t": "Webhooks", "u": "https://algomaster.io/learn/system-design/webhooks"}, {"t": "Idempotency", "u": "https://algomaster.io/learn/system-design/idempotency"}, {"t": "Rate limiting", "u": "https://blog.algomaster.io/p/rate-limiting-algorithms-explained-with-code"}, {"t": "API Design", "u": "https://abdulrwahab.medium.com/api-architecture-best-practices-for-designing-rest-apis-bf907025f5f"}], "groups": {}}, {"name": "Database Fundamentals", "items": [{"t": "Databases Types", "u": "https://algomaster.io/learn/system-design/database-types"}, {"t": "ACID Transactions", "u": "https://algomaster.io/learn/system-design/acid-transactions"}, {"t": "SQL vs NoSQL", "u": "https://algomaster.io/learn/system-design/sql-vs-nosql"}, {"t": "Database Scaling", "u": "https://blog.algomaster.io/p/system-design-how-to-scale-a-database"}, {"t": "Database Indexes", "u": "https://algomaster.io/learn/system-design/indexing"}, {"t": "Database Partitioning", "u": "https://algomaster.io/learn/system-design/database-partitioning"}, {"t": "Database Sharding", "u": "https://algomaster.io/learn/system-design/sharding"}, {"t": "Database Replication", "u": "https://algomaster.io/learn/system-design/database-replication"}, {"t": "Bloom Filters", "u": "https://algomaster.io/learn/system-design/bloom-filters"}], "groups": {}}, {"name": "Caching Fundamentals", "items": [{"t": "Caching 101", "u": "https://algomaster.io/learn/system-design/what-is-caching"}, {"t": "Caching Strategies", "u": "https://algomaster.io/learn/system-design/caching-strategies"}, {"t": "Cache Eviction Policies", "u": "https://blog.algomaster.io/p/7-cache-eviction-strategies"}, {"t": "Distributed Caching", "u": "https://blog.algomaster.io/p/distributed-caching"}, {"t": "Content Delivery Network (CDN)", "u": "https://algomaster.io/learn/system-design/content-delivery-network-cdn"}], "groups": {}}, {"name": "Asynchronous Communication", "items": [{"t": "Pub/Sub", "u": "https://algomaster.io/learn/system-design/pub-sub"}, {"t": "Message Queues", "u": "https://algomaster.io/learn/system-design/message-queues"}, {"t": "Message Brokers", "u": "https://algomaster.io/learn/system-design/message-brokers"}, {"t": "Change Data Capture (CDC)", "u": "https://algomaster.io/learn/system-design/change-data-capture-cdc"}], "groups": {}}, {"name": "Distributed System and Microservices", "items": [{"t": "HeartBeats", "u": "https://blog.algomaster.io/p/heartbeats-in-distributed-systems"}, {"t": "Service Discovery", "u": "https://blog.algomaster.io/p/service-discovery-in-distributed-systems"}, {"t": "Consensus Algorithms", "u": "https://medium.com/@sourabhatta1819/consensus-in-distributed-system-ac79f8ba2b8c"}, {"t": "Distributed Locking", "u": "https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html"}, {"t": "Gossip Protocol", "u": "http://highscalability.com/blog/2023/7/16/gossip-protocol-explained.html"}, {"t": "Circuit Breaker", "u": "https://medium.com/geekculture/design-patterns-for-microservices-circuit-breaker-pattern-276249ffab33"}, {"t": "Disaster Recovery", "u": "https://cloud.google.com/learn/what-is-disaster-recovery"}, {"t": "Distributed Tracing", "u": "https://www.dynatrace.com/news/blog/what-is-distributed-tracing/"}], "groups": {}}, {"name": "Architectural Patterns", "items": [{"t": "Client-Server Architecture", "u": "https://algomaster.io/learn/system-design/client-server-architecture"}, {"t": "Microservices Architecture", "u": "https://medium.com/hashmapinc/the-what-why-and-how-of-a-microservices-architecture-4179579423a9"}, {"t": "Serverless Architecture", "u": "https://blog.algomaster.io/p/2edeb23b-cfa5-4b24-845e-3f6f7a39d162"}, {"t": "Event-Driven Architecture", "u": "https://www.confluent.io/learn/event-driven-architecture/"}, {"t": "Peer-to-Peer (P2P) Architecture", "u": "https://www.spiceworks.com/tech/networking/articles/what-is-peer-to-peer/"}], "groups": {}}, {"name": "System Design Tradeoffs", "items": [{"t": "Top 15 Tradeoffs", "u": "https://blog.algomaster.io/p/system-design-top-15-trade-offs"}, {"t": "Vertical vs Horizontal Scaling", "u": "https://algomaster.io/learn/system-design/vertical-vs-horizontal-scaling"}, {"t": "Concurrency vs Parallelism", "u": "https://blog.algomaster.io/p/concurrency-vs-parallelism"}, {"t": "Long Polling vs WebSockets", "u": "https://blog.algomaster.io/p/long-polling-vs-websockets"}, {"t": "Batch vs Stream Processing", "u": "https://blog.algomaster.io/p/batch-processing-vs-stream-processing"}, {"t": "Stateful vs Stateless Design", "u": "https://blog.algomaster.io/p/stateful-vs-stateless-architecture"}, {"t": "Strong vs Eventual Consistency", "u": "https://blog.algomaster.io/p/strong-vs-eventual-consistency"}, {"t": "Read-Through vs Write-Through Cache", "u": "https://blog.algomaster.io/p/59cae60d-9717-4e20-a59e-759e370db4e5"}, {"t": "Push vs Pull Architecture", "u": "https://blog.algomaster.io/p/af5fe2fe-9a4f-4708-af43-184945a243af"}, {"t": "REST vs RPC", "u": "https://blog.algomaster.io/p/106604fb-b746-41de-88fb-60e932b2ff68"}, {"t": "Synchronous vs. asynchronous communications", "u": "https://blog.algomaster.io/p/aec1cebf-6060-45a7-8e00-47364ca70761"}, {"t": "Latency vs Throughput", "u": "https://aws.amazon.com/compare/the-difference-between-throughput-and-latency/"}], "groups": {}}, {"name": "How to Answer a System Design Interview Problem", "items": [], "groups": {}, "url": "https://algomaster.io/learn/system-design-interviews/answering-framework"}, {"name": "System Design Interview Problems", "items": [], "groups": {"Easy": [{"t": "Design URL Shortener like TinyURL", "u": "https://algomaster.io/learn/system-design-interviews/design-url-shortener"}, {"t": "Design Autocomplete for Search Engines", "u": "https://algomaster.io/learn/system-design-interviews/design-instagram"}, {"t": "Design Load Balancer", "u": "https://algomaster.io/learn/system-design-interviews/design-load-balancer"}, {"t": "Design Content Delivery Network (CDN)", "u": "https://www.youtube.com/watch?v=8zX0rue2Hic"}, {"t": "Design Parking Garage", "u": "https://www.youtube.com/watch?v=NtMvNh0WFVM"}, {"t": "Design Vending Machine", "u": "https://www.youtube.com/watch?v=D0kDMUgo27c"}, {"t": "Design Distributed Key-Value Store", "u": "https://www.youtube.com/watch?v=rnZmdmlR-2M"}, {"t": "Design Distributed Cache", "u": "https://www.youtube.com/watch?v=iuqZvajTOyA"}, {"t": "Design Authentication System", "u": "https://www.youtube.com/watch?v=uj_4vxm9u90"}, {"t": "Design Unified Payments Interface (UPI)", "u": "https://www.youtube.com/watch?v=QpLy0_c_RXk"}], "Medium": [{"t": "Design WhatsApp", "u": "https://algomaster.io/learn/system-design-interviews/design-whatsapp"}, {"t": "Design Spotify", "u": "https://algomaster.io/learn/system-design-interviews/design-spotify"}, {"t": "Design Instagram", "u": "https://algomaster.io/learn/system-design-interviews/design-instagram"}, {"t": "Design Notification Service", "u": "https://algomaster.io/learn/system-design-interviews/design-notification-service"}, {"t": "Design Distributed Job Scheduler", "u": "https://blog.algomaster.io/p/design-a-distributed-job-scheduler"}, {"t": "Design Tinder", "u": "https://www.youtube.com/watch?v=tndzLznxq40"}, {"t": "Design Facebook", "u": "https://www.youtube.com/watch?v=9-hjBGxuiEs"}, {"t": "Design Twitter", "u": "https://www.youtube.com/watch?v=wYk0xPP_P_8"}, {"t": "Design Reddit", "u": "https://www.youtube.com/watch?v=KYExYE_9nIY"}, {"t": "Design Netflix", "u": "https://www.youtube.com/watch?v=psQzyFfsUGU"}, {"t": "Design Youtube", "u": "https://www.youtube.com/watch?v=jPKTo1iGQiE"}, {"t": "Design Google Search", "u": "https://www.youtube.com/watch?v=CeGtqouT8eA"}, {"t": "Design E-commerce Store like Amazon", "u": "https://www.youtube.com/watch?v=EpASu_1dUdE"}, {"t": "Design TikTok", "u": "https://www.youtube.com/watch?v=Z-0g_aJL5Fw"}, {"t": "Design Shopify", "u": "https://www.youtube.com/watch?v=lEL4F_0J3l8"}, {"t": "Design Airbnb", "u": "https://www.youtube.com/watch?v=YyOXt2MEkv4"}, {"t": "Design Rate Limiter", "u": "https://www.youtube.com/watch?v=mhUQe4BKZXs"}, {"t": "Design Distributed Message Queue like Kafka", "u": "https://www.youtube.com/watch?v=iJLL-KPqBpM"}, {"t": "Design Flight Booking System", "u": "https://www.youtube.com/watch?v=qsGcfVGvFSs"}, {"t": "Design Online Code Editor", "u": "https://www.youtube.com/watch?v=07jkn4jUtso"}, {"t": "Design an Analytics Platform (Metrics & Logging)", "u": "https://www.youtube.com/watch?v=kIcq1_pBQSY"}, {"t": "Design Payment System", "u": "https://www.youtube.com/watch?v=olfaBgJrUBI"}, {"t": "Design a Digital Wallet", "u": "https://www.youtube.com/watch?v=4ijjIUeq6hE"}], "Hard": [{"t": "Design Location Based Service like Yelp", "u": "https://www.youtube.com/watch?v=M4lR_Va97cQ"}, {"t": "Design Uber", "u": "https://www.youtube.com/watch?v=umWABit-wbk"}, {"t": "Design Food Delivery App like Doordash", "u": "https://www.youtube.com/watch?v=iRhSAR3ldTw"}, {"t": "Design Google Docs", "u": "https://www.youtube.com/watch?v=2auwirNBvGg"}, {"t": "Design Google Maps", "u": "https://www.youtube.com/watch?v=jk3yvVfNvds"}, {"t": "Design Zoom", "u": "https://www.youtube.com/watch?v=G32ThJakeHk"}, {"t": "Design File Sharing System like Dropbox", "u": "https://www.youtube.com/watch?v=U0xTu6E2CT8"}, {"t": "Design Ticket Booking System like BookMyShow", "u": "https://www.youtube.com/watch?v=lBAwJgoO3Ek"}, {"t": "Design Distributed Web Crawler", "u": "https://www.youtube.com/watch?v=BKZxZwUgL3Y"}, {"t": "Design Code Deployment System", "u": "https://www.youtube.com/watch?v=q0KGYwNbf-0"}, {"t": "Design Distributed Cloud Storage like S3", "u": "https://www.youtube.com/watch?v=UmWtcgC96X8"}, {"t": "Design Distributed Locking Service", "u": "https://www.youtube.com/watch?v=v7x75aN9liM"}]}}, {"name": "Courses", "items": [{"t": "System Design Fundamentals", "u": "https://algomaster.io/learn/system-design/course-introduction"}, {"t": "System Design Interviews", "u": "https://algomaster.io/learn/system-design-interviews/introduction"}], "groups": {}}, {"name": "Newsletters", "items": [{"t": "AlgoMaster Newsletter", "u": "https://blog.algomaster.io/"}], "groups": {}}, {"name": "Books", "items": [{"t": "Designing Data-Intensive Applications", "u": "https://www.amazon.in/dp/9352135245"}], "groups": {}}, {"name": "YouTube Channels", "items": [{"t": "Tech Dummies Narendra L", "u": "https://www.youtube.com/@TechDummiesNarendraL"}, {"t": "Gaurav Sen", "u": "https://www.youtube.com/@gkcs"}, {"t": "codeKarle", "u": "https://www.youtube.com/@codeKarle"}, {"t": "ByteByteGo", "u": "https://www.youtube.com/@ByteByteGo"}, {"t": "System Design Interview", "u": "https://www.youtube.com/@SystemDesignInterview"}, {"t": "sudoCODE", "u": "https://www.youtube.com/@sudocode"}, {"t": "Success in Tech", "u": "https://www.youtube.com/@SuccessinTech/videos"}], "groups": {}}, {"name": "Must-Read Engineering Articles", "items": [{"t": "How Discord stores trillions of messages", "u": "https://discord.com/blog/how-discord-stores-trillions-of-messages"}, {"t": "Building In-Video Search at Netflix", "u": "https://netflixtechblog.com/building-in-video-search-936766f0017c"}, {"t": "How Canva scaled Media uploads from Zero to 50 Million per Day", "u": "https://www.canva.dev/blog/engineering/from-zero-to-50-million-uploads-per-day-scaling-media-at-canva/"}, {"t": "How Airbnb avoids double payments in a Distributed Payments System", "u": "https://medium.com/airbnb-engineering/avoiding-double-payments-in-a-distributed-payments-system-2981f6b070bb"}, {"t": "Stripe’s payments APIs - The first 10 years", "u": "https://stripe.com/blog/payment-api-design"}, {"t": "Real time messaging at Slack", "u": "https://slack.engineering/real-time-messaging/"}], "groups": {}}, {"name": "Must-Read Distributed Systems Papers", "items": [{"t": "Paxos: The Part-Time Parliament", "u": "https://lamport.azurewebsites.net/pubs/lamport-paxos.pdf"}, {"t": "MapReduce: Simplified Data Processing on Large Clusters", "u": "https://research.google.com/archive/mapreduce-osdi04.pdf"}, {"t": "The Google File System", "u": "https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf"}, {"t": "Dynamo: Amazon’s Highly Available Key-value Store", "u": "https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf"}, {"t": "Kafka: a Distributed Messaging System for Log Processing", "u": "https://notes.stephenholiday.com/Kafka.pdf"}, {"t": "Spanner: Google’s Globally-Distributed Database", "u": "https://static.googleusercontent.com/media/research.google.com/en//archive/spanner-osdi2012.pdf"}, {"t": "Bigtable: A Distributed Storage System for Structured Data", "u": "https://static.googleusercontent.com/media/research.google.com/en//archive/bigtable-osdi06.pdf"}, {"t": "ZooKeeper: Wait-free coordination for Internet-scale systems", "u": "https://www.usenix.org/legacy/event/usenix10/tech/full_papers/Hunt.pdf"}, {"t": "The Log-Structured Merge-Tree (LSM-Tree)", "u": "https://www.cs.umb.edu/~poneil/lsmtree.pdf"}, {"t": "The Chubby lock service for loosely-coupled distributed systems", "u": "https://static.googleusercontent.com/media/research.google.com/en//archive/chubby-osdi06.pdf"}], "groups": {}}];
+/* ===== helpers ===== */
+const NS='http://www.w3.org/2000/svg';
+function add(e,kids){for(const k of kids.flat(9)){if(k==null||k===false)continue;e.append(k.nodeType?k:document.createTextNode(String(k)));}}
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in attrs||{}){const v=attrs[k];if(v==null||v===false)continue;if(k==='class')e.className=v;else if(k==='style')e.style.cssText=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v===true?'':v);}add(e,kids);return e;}
+function sv(tag,attrs,...kids){const e=document.createElementNS(NS,tag);for(const k in attrs||{}){const v=attrs[k];if(v==null||v===false)continue;if(k==='class')e.setAttribute('class',v);else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v);}for(const c of kids.flat(9)){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)));}return e;}
+function svgBox(w,hh,...kids){return sv('svg',{viewBox:`0 0 ${w} ${hh}`,role:'img','aria-label':'diagram'},...kids);}
+const btn=(label,fn,cls='')=>h('button',{class:'btn small '+cls,type:'button',onclick:fn},label);
+const chip=(label,fn,on)=>h('button',{class:'chip'+(on?' on':''),type:'button',onclick:fn},label);
+function ctl(label,min,max,val,step,fn,fmt){fmt=fmt||(v=>v);const o=h('output',{},fmt(val));const i=h('input',{type:'range',min,max,step,value:val,'aria-label':label});i.addEventListener('input',()=>{o.textContent=fmt(+i.value);fn(+i.value);});return {el:h('div',{class:'ctl'},h('label',{},label),i,o),get:()=>+i.value,set:v=>{i.value=v;o.textContent=fmt(+i.value);}};}
+function readout(t){const e=h('div',{class:'readout','aria-live':'polite'},t||'');e.set=s=>{e.textContent=s;};return e;}
+function meter(pct,cls){const f=h('div',{class:'fill '+(cls||''),style:`width:${pct||0}%`});const m=h('div',{class:'meter'},f);m.set=(p,c)=>{f.style.width=Math.max(0,Math.min(100,p))+'%';f.className='fill '+(c||'');};return m;}
+function logbox(){const e=h('div',{class:'log','aria-live':'polite'});e.say=(t,c)=>{e.append(h('div',{class:c||''},t));e.scrollTop=e.scrollHeight;};e.clear=()=>{e.textContent='';};return e;}
+function tabs(names,fn,start){const w=h('div',{class:'chips',role:'tablist'});const bs=names.map((n,i)=>{const b=chip(n,()=>{bs.forEach((x,j)=>x.classList.toggle('on',i===j));fn(i,n);},i===(start||0));return b;});add(w,bs);w.select=i=>bs[i].click();return w;}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=(seed=>()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296));
+function mkRand(seed){let s=seed>>>0;return()=>((s=(s*1664525+1013904223)>>>0)/4294967296);}
+function fnv(str){let x=0x811c9dc5;for(let i=0;i<str.length;i++){x^=str.charCodeAt(i);x=Math.imul(x,0x01000193)>>>0;}return x>>>0;}
+const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const REDUCED=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* timers owned by the current view */
+let TIMERS=[];
+const ctx={every(ms,fn){const t=setInterval(fn,ms);TIMERS.push(()=>clearInterval(t));return ()=>clearInterval(t);},after(ms,fn){const t=setTimeout(fn,ms);TIMERS.push(()=>clearTimeout(t));return t;}};
+function clearTimers(){TIMERS.forEach(f=>f());TIMERS=[];}
+
+/* ===== state ===== */
+const STORE='sysdesign-from-scratch-v1';
+let S={done:{},xp:0,streak:0,last:'',theme:''};
+try{const raw=localStorage.getItem(STORE);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
+function today(){return new Date().toISOString().slice(0,10);}
+function bumpStreak(){const t=today();if(S.last===t)return;const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=S.last===y?S.streak+1:1;S.last=t;}
+if(S.theme)document.documentElement.setAttribute('data-theme',S.theme);
+
+/* ===== data model ===== */
+const PHASES=[];const LESSONS=[];const BYKEY={};const BYID={};
+function phase(o){o.lessons=[];o.i=PHASES.length;PHASES.push(o);return o;}
+function lesson(pi,o){o.phase=pi;o.id=slug(o.key);if(BYID[o.id])throw new Error('dup lesson '+o.id);LESSONS.push(o);PHASES[pi].lessons.push(o);BYKEY[o.key]=o;BYID[o.id]=o;return o;}
+const repoUrl={};for(const s of REPO){for(const it of s.items)repoUrl[it.t]=it.u;for(const g in s.groups)for(const it of s.groups[g])repoUrl[it.t]=it.u;}
+function ytId(u){const m=/[?&]v=([\w-]{11})/.exec(u||'');return m?m[1]:null;}
+const GROUP=i=>PHASES[i].g;
+function planned(p){const sec=REPO.find(x=>x.name===p.sec);if(!sec)return [];return p.grp?sec.groups[p.grp]:sec.items;}
+
+/* ===== generic demos ===== */
+const DEMOS={};
+/* sequence diagram, animated step by step. opts:{actors:[],steps:[{f,t,m,n,r}],variants:{name:{steps}}} */
+DEMOS.steps=function(host,o){
+  const variants=o.variants||{Flow:{steps:o.steps,actors:o.actors}};const names=Object.keys(variants);let cur=names[0],idx=0,playing=null;
+  const stage=h('div',{class:'stepper'});const narr=h('div',{class:'takeaway'});const bar=h('div',{class:'row'});
+  function draw(){
+    const V=variants[cur];const A=V.actors||o.actors;const st=V.steps;const W=720,colW=W/A.length,top=46,rowH=46,H=top+st.length*rowH+20;
+    const s=svgBox(W,H);
+    A.forEach((a,i)=>{const x=colW*i+colW/2;s.append(sv('rect',{x:x-colW/2+8,y:6,width:colW-16,height:28,rx:8,fill:'var(--accent-soft)',stroke:'var(--line)'}),sv('text',{x,y:25,'text-anchor':'middle','font-size':12,'font-weight':600,fill:'var(--ink)'},a),sv('line',{x1:x,y1:36,x2:x,y2:H-8,stroke:'var(--line)','stroke-dasharray':'4 4'}));});
+    st.forEach((p,i)=>{if(i>idx)return;const y=top+i*rowH+16,x1=colW*p.f+colW/2,x2=colW*p.t+colW/2,self=p.f===p.t;const cur_=i===idx;const col=p.r?'var(--g1)':p.bad?'var(--bad)':'var(--accent)';
+      const g=sv('g',{class:cur_?'fade':''});
+      if(self){g.append(sv('path',{d:`M${x1} ${y-8} h34 v16 h-34`,fill:'none',stroke:col,'stroke-width':cur_?2.6:1.6,'marker-end':'url(#ar)'}),sv('text',{x:x1+40,y:y+4,'font-size':11.5,fill:'var(--ink)'},`${i+1}. ${p.m}`));}
+      else{const dir=x2>x1?1:-1;g.append(sv('line',{x1,y1:y,x2:x2-dir*4,y2:y,stroke:col,'stroke-width':cur_?2.6:1.6,'stroke-dasharray':p.r?'6 4':null,'marker-end':'url(#ar)'}),sv('text',{x:(x1+x2)/2,y:y-6,'text-anchor':'middle','font-size':11.5,fill:'var(--ink)','font-weight':cur_?700:500},`${i+1}. ${p.m}`));}
+      s.append(g);});
+    s.insertBefore(sv('defs',{},sv('marker',{id:'ar',viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},sv('path',{d:'M0 0L10 5L0 10z',fill:'context-stroke'}))),s.firstChild);
+    stage.textContent='';stage.append(s);
+    narr.textContent=idx<0?'Press Next to start.':(st[idx].n||st[idx].m);
+    prev.disabled=idx<=0;next.disabled=idx>=st.length-1;
+  }
+  const prev=btn('Back',()=>{stop();idx=Math.max(0,idx-1);draw();},'ghost');const next=btn('Next step',()=>{stop();step();});const play=btn('Play',()=>{if(playing){stop();return;}if(idx>=variants[cur].steps.length-1)idx=0;draw();play.textContent='Pause';playing=ctx.every(REDUCED?200:1400,()=>{if(idx>=variants[cur].steps.length-1){stop();return;}idx++;draw();});},'ghost');
+  const reset=btn('Reset',()=>{stop();idx=0;draw();},'ghost');
+  function stop(){if(playing){playing();playing=null;}play.textContent='Play';}
+  function step(){if(idx<variants[cur].steps.length-1)idx++;draw();}
+  if(names.length>1)host.append(tabs(names,(i,n)=>{stop();cur=n;idx=0;draw();}));
+  add(bar,[prev,next,play,reset]);host.append(stage,narr,bar);draw();
+};
+/* scenario picker. opts:{options:[{id,name,desc}],rounds:[{s,a,why}],prompt} */
+DEMOS.pick=function(host,o){
+  let i=0,score=0;const box=h('div',{class:'cards'});const out=h('div',{class:'takeaway'});const head=h('div',{class:'result'});const nextB=btn('Next scenario',()=>{i++;render();});
+  function render(){box.textContent='';out.textContent='';nextB.style.display='none';
+    if(i>=o.rounds.length){head.textContent=`Score: ${score} of ${o.rounds.length}`;box.append(h('div',{class:'note'},'Run it again from the top to try a different instinct.'));add(out,[btn('Restart',()=>{i=0;score=0;render();},'ghost')]);return;}
+    const R=o.rounds[i];head.textContent=`Scenario ${i+1} of ${o.rounds.length}: ${R.s}`;
+    o.options.forEach(op=>{const c=h('button',{class:'card',type:'button',style:'cursor:pointer;text-align:left',onclick:()=>{if(box.dataset.locked)return;box.dataset.locked=1;const right=op.id===R.a;if(right)score++;[...box.children].forEach((b,k)=>{const oo=o.options[k];b.classList.add(oo.id===R.a?'ok':(oo.id===op.id?'hot':'dim'));});out.textContent=(right?'Right. ':'Not quite. ')+R.why;nextB.style.display='';nextB.textContent=i===o.rounds.length-1?'See score':'Next scenario';}},h('h4',{},op.name),h('span',{class:'note'},op.desc||''));box.append(c);});
+    delete box.dataset.locked;}
+  host.append(h('div',{class:'note'},o.prompt||'Pick the best fit for each scenario.'),head,box,out,nextB);render();
+};
+/* flip cards. opts:{cards:[{f,b}]} */
+DEMOS.flip=function(host,o){const g=h('div',{class:'cards'});o.cards.forEach(c=>{const b=h('button',{class:'card',type:'button',style:'cursor:pointer;text-align:left','aria-expanded':'false'},h('h4',{},c.f),h('span',{class:'note'},'Tap to reveal'));let open=false;b.onclick=()=>{open=!open;b.setAttribute('aria-expanded',open);b.lastChild.textContent=open?c.b:'Tap to reveal';b.classList.toggle('ok',open);};g.append(b);});host.append(h('div',{class:'note'},o.prompt||'Try to answer in your head first, then flip.'),g);};
+/* compare table. opts:{cols:[..],rows:[[label,a,b],..]} */
+DEMOS.compare=function(host,o){const t=h('table',{class:'t'},h('tr',{},h('th',{},''),o.cols.map(c=>h('th',{},c))),o.rows.map(r=>h('tr',{},h('th',{},r[0]),r.slice(1).map(x=>h('td',{},x)))));host.append(t);};
+/* architecture builder for interview problems */
+DEMOS.design=function(host,o){
+  const pool=[...o.right.map(x=>({x,ok:1})),...o.wrong.map(x=>({x,ok:0}))].sort((a,b)=>fnv(a.x)-fnv(b.x));const picked=new Set();
+  const grid=h('div',{class:'cards'});const out=h('div',{class:'takeaway'},'Pick every component this design needs, then check.');
+  pool.forEach((p,i)=>{const [name,why]=p.x.split(' | ');const c=h('button',{class:'card',type:'button',style:'cursor:pointer;text-align:left','aria-pressed':'false'},h('h4',{},name),h('span',{class:'note',style:'display:none'},why||''));c.onclick=()=>{if(c.dataset.checked)return;if(picked.has(i)){picked.delete(i);c.classList.remove('ok');c.setAttribute('aria-pressed','false');}else{picked.add(i);c.classList.add('ok');c.setAttribute('aria-pressed','true');}};c.dataset.i=i;grid.append(c);});
+  const check=btn('Check my design',()=>{let good=0,miss=0,extra=0;[...grid.children].forEach((c,i)=>{c.dataset.checked=1;const p=pool[i],sel=picked.has(i);c.classList.remove('ok');c.lastChild.style.display='';if(p.ok&&sel){good++;c.classList.add('ok');}else if(p.ok&&!sel){miss++;c.classList.add('hot');c.firstChild.append(h('span',{},'missing'));}else if(!p.ok&&sel){extra++;c.classList.add('hot');c.firstChild.append(h('span',{},'not needed'));}else c.classList.add('dim');});out.textContent=`Matched ${good} of ${o.right.length} needed components. Missing ${miss}, unnecessary ${extra}. Read each card for the reason.`;check.disabled=true;});
+  host.append(grid,h('div',{class:'row'},check,btn('Try again',()=>{host.textContent='';DEMOS.design(host,o);},'ghost')),out);
+};
+
+/* ===== video ===== */
+function videoEl(id){const w=h('div',{style:'position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000'});
+  const b=h('button',{type:'button','aria-label':'Play video',style:'all:unset;cursor:pointer;display:block;width:100%;height:100%;position:relative',onclick:()=>{w.textContent='';w.append(h('iframe',{src:`https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`,title:'Video walkthrough',allow:'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen',allowfullscreen:true,loading:'lazy',style:'position:absolute;inset:0;width:100%;height:100%;border:0'}));}},
+    h('img',{src:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,alt:'',style:'width:100%;height:100%;object-fit:cover;opacity:.85'}),
+    h('span',{style:'position:absolute;inset:0;display:grid;place-items:center'},h('span',{style:'width:68px;height:48px;border-radius:14px;background:#E11D2E;display:grid;place-items:center'},sv('svg',{viewBox:'0 0 24 24',width:26,height:26,style:'background:none'},sv('path',{d:'M8 5v14l11-7z',fill:'#fff'})))));
+  w.append(b);return w;}
+
+
+function deepEl(d){return h('div',{class:'deep'},d.map(x=>typeof x==='string'?h('p',{},x):h('div',{class:'dsec'},h('h3',{},x.h),(x.p||[]).map(t=>h('p',{},t)),x.ul?h('ul',{},x.ul.map(t=>h('li',{},t))):null)));}
+function iqEl(list,title,who){const box=h('div',{class:'iq'});box.append(h('h3',{},title));
+  list.forEach((q,i)=>{const ta=h('textarea',{rows:3,placeholder:'Practise: type or say your answer before reading the points below.','aria-label':'Your practice answer'});
+    box.append(h('details',{class:'iqd'},h('summary',{},h('span',{class:'badge '+(q.lvl==='Staff+'?'warn':'')},q.lvl||'Senior'),' ',q.q,who?h('span',{class:'note'},'  ('+q.from+')'):null),
+      ta,h('b',{},'A strong answer covers'),h('ul',{},q.cover.map(t=>h('li',{},t))),q.pitfalls?h('b',{},'Common pitfalls'):null,q.pitfalls?h('ul',{},q.pitfalls.map(t=>h('li',{},t))):null));});
+  return box;}
+
+/* ===== router + views ===== */
+const root=document.getElementById('app');
+function lessonHref(l){return '#/l/'+l.id;}
+function totals(){const d=LESSONS.filter(l=>S.done[l.id]).length;return {d,n:LESSONS.length};}
+function header(){const t=totals();return h('div',{class:'top'},h('a',{class:'brand',href:'#/'},sv('svg',{viewBox:'0 0 34 34','aria-hidden':'true'},sv('circle',{cx:17,cy:17,r:13,fill:'none',stroke:'var(--ink)','stroke-width':4.5}),sv('rect',{x:1,y:12,width:32,height:10,rx:2,fill:'var(--accent)'})),'System Design From Scratch'),
+  h('div',{class:'nav'},h('a',{class:'pill',href:'#/prereq'},'Prerequisites'),h('a',{class:'pill',href:'#/library'},'Library'),h('a',{class:'pill',href:'#/about'},'Progress'),
+  h('span',{class:'pill xp'},`${S.xp} XP`),h('span',{class:'pill'},`${S.streak} day streak`),h('span',{class:'pill'},`${t.d}/${t.n} lessons`),
+  h('button',{class:'pill',type:'button',onclick:()=>{const dark=(document.documentElement.getAttribute('data-theme')||(matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark';S.theme=dark?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);save();},'aria-label':'Toggle dark mode'},'Theme')));}
+function shell(...kids){clearTimers();root.textContent='';const w=h('div',{class:'wrap'},header(),...kids);root.append(w);window.scrollTo&&window.scrollTo(0,0);document.title='System Design From Scratch';return w;}
+const gv=(i,k)=>`var(--g${GROUP(i)}${k||''})`;
+
+const ABBR=['Core Concepts','Networking','APIs','Databases','Caching','Async Messaging','Distributed Systems','Architecture Patterns','Tradeoffs','Interview Framework','Problems: Easy','Problems: Medium','Problems: Hard'];
+const lineVars=i=>`--lc:var(--l${i});--lt:var(--t${i})`;
+let introPlayed=false;
+function polyAt(pts,d){let acc=0;for(let k=0;k<pts.length-1;k++){const [ax,ay]=pts[k],[bx,by]=pts[k+1],L=Math.hypot(bx-ax,by-ay);if(d<=acc+L||k===pts.length-2){const t=Math.min(1,(d-acc)/L);return [ax+(bx-ax)*t,ay+(by-ay)*t];}acc+=L;}return pts[pts.length-1];}
+function mapEl(){
+  const W=1000,x0=262,x1=964,rowH=46,top=30;const H=top+PHASES.length*rowH;const play=!introPlayed&&!REDUCED;introPlayed=true;
+  const svg=sv('svg',{class:'map',viewBox:`0 0 ${W} ${H}`,role:'group','aria-label':'Course map. Each coloured line is a phase and each station is a lesson.'});
+  const tip=sv('text',{class:'tip','text-anchor':'middle',x:0,y:0,opacity:0});
+  PHASES.forEach((p,i)=>{
+    const y=top+i*rowH,built=p.lessons.length>0,n=Math.max(1,built?p.lessons.length:planned(p).length);
+    const dy=(i%2?13:-13),xa=420+((i*71)%240);
+    const pts=[[x0,y],[xa,y],[xa+Math.abs(dy),y+dy],[x1,y+dy]];
+    const len=(xa-x0)+Math.abs(dy)*1.4142+(x1-xa-Math.abs(dy));
+    const d='M'+pts.map(q=>q[0]+' '+q[1]).join(' L');
+    const c=`var(--l${i})`;
+    const g=sv('g',{});
+    g.append(sv('a',{href:'#/p/'+i,'aria-label':`Phase ${i}: ${p.name}`},
+      sv('circle',{cx:30,cy:y,r:15,fill:c}),sv('text',{x:30,y:y+5,'text-anchor':'middle','font-size':14,'font-weight':800,fill:`var(--t${i})`},String(i)),
+      sv('text',{class:'nm',x:56,y:y-1},ABBR[i]),
+      sv('text',{class:'cnt',x:56,y:y+15},built?`${p.lessons.filter(l=>S.done[l.id]).length} of ${p.lessons.length} done`:`planned, ${n} topic${n>1?'s':''}`)));
+    g.append(sv('path',{class:'ln '+(built?(play?'draw':''):'plan'),d,stroke:c,style:`--d:${i};--len:${Math.ceil(len)+2}`}));
+    const r=built?8:(n>14?4:5);
+    for(let k=0;k<n;k++){const dist=n===1?len/2:len*k/(n-1);const [sx,sy]=polyAt(pts,dist);
+      if(built){const l=p.lessons[k];const st=sv('a',{class:'st'+(S.done[l.id]?' done':'')+(play?' pop':''),href:lessonHref(l),'aria-label':`${l.key}${S.done[l.id]?', complete':''}`,style:`--c:${c};--d:${i}`},sv('circle',{cx:sx,cy:sy,r,stroke:c}),sv('title',{},l.key));
+        const show=()=>{tip.textContent=l.key;tip.setAttribute('x',Math.min(W-90,Math.max(90,sx)));tip.setAttribute('y',sy-16);tip.setAttribute('opacity',1);};st.addEventListener('pointerenter',show);st.addEventListener('focus',show);st.addEventListener('pointerleave',()=>tip.setAttribute('opacity',0));st.addEventListener('blur',()=>tip.setAttribute('opacity',0));g.append(st);}
+      else{g.append(sv('g',{class:'st plan'},sv('circle',{cx:sx,cy:sy,r,stroke:c}),sv('title',{},'Planned: '+((planned(p)[k]||{}).t||p.name))));}}
+    svg.append(g);});
+  svg.append(tip);
+  return h('div',{class:'mapwrap'},svg);}
+function viewHome(q){
+  const t=totals();
+  const search=h('input',{class:'search',type:'search',placeholder:'Find a station: CAP, sharding, design Uber...','aria-label':'Search lessons',value:q||''});
+  const results=h('div',{class:'lessons'});const mapw=mapEl();
+  const legend=h('div',{class:'legend'});
+  PHASES.forEach(p=>{const d=p.lessons.filter(l=>S.done[l.id]).length,n=p.lessons.length||planned(p).length||1;
+    legend.append(h('a',{class:'lg',href:'#/p/'+p.i,style:lineVars(p.i)},h('span',{class:'roundel','aria-hidden':'true'},String(p.i)),h('span',{class:'tx'},h('b',{},p.name),meter(p.lessons.length?100*d/p.lessons.length:0),h('span',{class:'cnt'},p.lessons.length?`${d} of ${p.lessons.length} stations done`:`Planned: ${n} topic${n>1?'s':''}`)))); });
+  legend.append(h('a',{class:'lg',href:'#/library',style:'--lc:var(--accent);--lt:var(--on-accent)'},h('span',{class:'roundel','aria-hidden':'true'},'L'),h('span',{class:'tx'},h('b',{},'Library'),h('span',{class:'cnt'},'Courses, books, channels, papers'))));
+  const lh=h('h3',{},'All lines');
+  function doSearch(){results.textContent='';const v=search.value.trim().toLowerCase();const hide=!!v;mapw.style.display=hide?'none':'';legend.style.display=hide?'none':'';lh.style.display=hide?'none':'';if(!v)return;const hits=LESSONS.filter(l=>(l.key+' '+(l.short||'')+' '+(l.lead||'')).toLowerCase().includes(v)).slice(0,30);if(!hits.length)results.append(h('p',{class:'note'},'No station matches. Try another word.'));hits.forEach(l=>results.append(lrow(l)));}
+  search.addEventListener('input',doSearch);
+  shell(h('div',{class:'hero'},h('h1',{},'Ride every system design topic.'),h('div',{class:'sub'},h('p',{},'One line per phase of the awesome-system-design-resources list. Board a station, play with the demo, read the depth, pass the quiz, and the station fills in. Not affiliated with the source repo.'),
+    h('div',{class:'row'},h('a',{class:'btn',href:'#/p/0'},'Board at Core Concepts'),h('a',{class:'btn ghost',href:'#/prereq'},'Check prerequisites'),h('span',{class:'note'},`${t.d} of ${t.n} stations built so far`)),search)),
+    mapw,results,lh,legend);
+  if(q)doSearch();
+}
+function lrow(l){return h('a',{class:'lrow'+(S.done[l.id]?' done':''),href:lessonHref(l),style:lineVars(l.phase)},h('span',{class:'dot','aria-hidden':'true'}),h('span',{class:'tx'},h('b',{},l.key),h('span',{},l.tag||'')),h('span',{class:'badge lv'},ABBR[l.phase]||PHASES[l.phase].name));}
+function viewPhase(i){const p=PHASES[i];if(!p)return viewHome();const d=p.lessons.filter(l=>S.done[l.id]).length;
+  shell(h('div',{class:'panel',style:lineVars(i)},h('div',{class:'crumbs'},h('a',{href:'#/'},'Home'),' / Line '+i),h('div',{class:'sign'},h('span',{class:'roundel','aria-hidden':'true'},String(i)),h('h2',{},p.name)),h('p',{class:'lead'},p.intro||p.sub),
+    p.pre&&p.pre.length?h('div',{class:'takeaway'},h('b',{},'Before this line: '),p.pre.join(' · ')):null,
+    meter(p.lessons.length?100*d/p.lessons.length:0),h('span',{class:'note'},`${d} of ${p.lessons.length} stations complete`),
+    p.lessons.length?h('div',{class:'lessons line'},p.lessons.map(lrow)):h('div',{class:'lessons line'},planned(p).map(x=>h('div',{class:'lrow',style:'opacity:.6'},h('span',{class:'dot','aria-hidden':'true'}),h('span',{class:'tx'},h('b',{},x.t),h('span',{},'Planned')),h('span',{class:'badge lv'},'Coming soon')))),
+    p.lessons.length?h('div',{style:'display:flex;flex-direction:column;gap:14px'},h('h3',{},'Interview questions for this phase'),h('p',{class:'note'},'Senior SDE level and above. Senior answers give trade-offs, numbers and failure modes. Staff+ answers add cost, migration and organisational angles. Try each out loud before opening it.'),p.iq?iqEl(p.iq,'Across the whole phase'):null,...p.lessons.filter(l=>l.iq&&l.iq.length).map(l=>iqEl(l.iq.map(q=>Object.assign({},q,{from:l.short||l.key})),l.short||l.key,true))):null,
+    p.lessons.length?null:h('div',{class:'takeaway'},h('b',{},'Not built yet. '),'This line opens when its stations are built.'),
+    h('div',{class:'nextprev'},i>0?h('a',{class:'btn ghost',href:'#/p/'+(i-1)},'Previous line'):h('span'),i<PHASES.length-1?h('a',{class:'btn ghost',href:'#/p/'+(i+1)},'Next line'):h('a',{class:'btn ghost',href:'#/library'},'Library'))));}
+function viewLesson(id){const l=BYID[id];if(!l)return viewHome();const p=PHASES[l.phase];const idx=p.lessons.indexOf(l);const prev=p.lessons[idx-1],next=p.lessons[idx+1];
+  const demo=h('div',{class:'demo'});
+  const w=shell();const panel=h('div',{class:'panel',style:lineVars(l.phase)});w.append(panel);
+  document.title=l.key+' | System Design From Scratch';
+  panel.append(h('div',{class:'crumbs'},h('a',{href:'#/'},'Home'),' / ',h('a',{href:'#/p/'+l.phase},'Line '+l.phase+': '+p.name),' / ',l.short||l.key),h('div',{class:'sign'},h('span',{class:'roundel','aria-hidden':'true'},String(l.phase)),h('h2',{},l.title||l.key)),h('div',{class:'tag'},l.tag||''),
+    h('nav',{class:'rail','aria-label':'Stations on this line'},p.lessons.map(x=>h('a',{href:lessonHref(x),class:(x===l?'cur ':'')+(S.done[x.id]?'done':''),title:x.key,'aria-label':x.key+(x===l?' (current)':'')},h('i')))));
+  if(l.pre&&l.pre.length){panel.append(h('div',{class:'row'},h('span',{class:'note'},'Prerequisites:'),l.pre.map(k=>{const t=BYKEY[k];return t?h('a',{class:'chip'+(S.done[t.id]?' ok':''),href:lessonHref(t)},(t.short||t.key)):h('span',{class:'chip'},k);})));}
+  panel.append(h('p',{class:'lead'},l.lead));
+  if(l.more)panel.append(h('div',{class:'lessons'},[].concat(l.more).map(m=>h('p',{class:'lead'},m))));
+  panel.append(demo);
+  try{DEMOS[l.demo](demo,l.opts||{},ctx);}catch(e){demo.append(h('p',{class:'note'},'Demo failed to load: '+e.message));console.error(l.id,e);}
+  if(l.takeaway)panel.append(h('div',{class:'takeaway'},h('b',{},'Takeaway. '),l.takeaway));
+  const vid=l.vid||ytId(repoUrl[l.key]);if(vid)panel.append(h('h3',{},'Watch'),videoEl(vid),h('p',{class:'note'},l.vid?'Suggested video found by web search. It is not from the source list, so judge it yourself. Loads only when you press play.':'Video from the source list, embedded from YouTube. It loads only when you press play.'));
+  if(l.deep)panel.append(h('h2',{style:'font-size:1.4rem'},'In depth'),deepEl(l.deep));
+  panel.append(quizEl(l));
+  if(l.iq&&l.iq.length)panel.append(iqEl(l.iq,'Interview questions (senior level and above)'));
+  const src=repoUrl[l.key];
+  const links=h('div',{class:'row'});if(src)links.append(h('a',{class:'btn ghost small',href:src,target:'_blank',rel:'noopener noreferrer'},'Read the source article'));(l.links||[]).forEach(x=>links.append(h('a',{class:'btn ghost small',href:x[1],target:'_blank',rel:'noopener noreferrer'},x[0])));panel.append(links);
+  if(l.terms&&l.terms.length)panel.append(h('table',{class:'t'},l.terms.map(t=>h('tr',{},h('th',{},t[0]),h('td',{},t[1])))));
+  panel.append(h('div',{class:'nextprev'},prev?h('a',{class:'btn ghost',href:lessonHref(prev)},'Back: '+(prev.short||prev.key)):h('span'),next?h('a',{class:'btn',href:lessonHref(next)},'Next: '+(next.short||next.key)):h('a',{class:'btn',href:'#/p/'+Math.min(l.phase+1,PHASES.length-1)},'Next phase')));
+}
+function quizEl(l){const box=h('div',{class:'quiz'});const banner=h('div');const qs=l.quiz||[];const ok=new Array(qs.length).fill(false);const first=new Array(qs.length).fill(true);
+  box.append(h('h3',{},'Check yourself'));
+  qs.forEach((Q,qi)=>{const opts=h('div',{class:'opts'});const why=h('div',{class:'why'});const hint=Q.hint?h('div',{class:'note'},'Hint: '+Q.hint):null;
+    Q.o.forEach((t,oi)=>{const b=h('button',{class:'opt',type:'button',onclick:()=>{if(ok[qi])return;if(oi===Q.a){b.classList.add('right');ok[qi]=true;if(first[qi]&&!S.done[l.id])S.xp+=10;why.textContent='Right. '+Q.why;finish();}else{b.classList.add('wrong');first[qi]=false;why.textContent='Not quite. Try another option.';}}},t);opts.append(b);});
+    box.append(h('div',{class:'q'},h('b',{},`${qi+1}. ${Q.q}`),hint,opts,why));});
+  function finish(){if(ok.every(Boolean)&&!S.done[l.id]){S.done[l.id]=true;S.xp+=5;bumpStreak();save();{const c=document.querySelector('.rail a.cur');if(c)c.classList.add('done');}banner.className='done-banner';banner.textContent='Lesson complete. +5 XP';}else if(S.done[l.id]){banner.className='done-banner';banner.textContent='Lesson complete.';}save();}
+  if(S.done[l.id]){banner.className='done-banner';banner.textContent='Completed earlier. You can retry the quiz any time.';}
+  box.append(banner);return box;}
+function viewPrereq(){
+  const items=[['Basic programming','Variables, loops, functions, and reading short code samples. The demos are in the browser, so you never need to write code to follow along.'],['How the web works','A browser asks a server for a page and gets a response back. Phase 1 builds on this.'],['Basic data structures','Hash maps, queues, arrays and trees. Hashing, caching, indexes and queues all reuse them.'],['Basic SQL','SELECT, JOIN and what a table is. Needed for the database phase.'],['Comfort with simple arithmetic','Powers of 2 and 10, and percentages. The interview phases use quick estimates, nothing harder.']];
+  shell(h('div',{class:'panel'},h('div',{class:'crumbs'},h('a',{href:'#/'},'Home'),' / Prerequisites'),h('h2',{},'Prerequisites'),h('p',{class:'lead'},'You do not need to be an expert in any of this. If one item feels shaky, spend an evening on it first and the course will go much faster.'),
+    h('div',{class:'cards'},items.map(x=>h('div',{class:'card'},h('h4',{},x[0]),h('span',{class:'note'},x[1])))),
+    h('h3',{},'What each phase expects'),
+    h('table',{class:'t'},h('tr',{},h('th',{},'Phase'),h('th',{},'Before you start')),PHASES.map(p=>h('tr',{},h('th',{},h('a',{href:'#/p/'+p.i},`${p.i}. ${p.name}`)),h('td',{},(p.pre&&p.pre.length?p.pre.join('; '):'Nothing beyond the list above.'))))),
+    h('p',{class:'note'},'Every lesson also shows its own prerequisite chips. A chip turns green once you have finished that lesson.')));}
+function viewLibrary(){
+  const secs=REPO.filter(s=>['Courses','Newsletters','Books','YouTube Channels','Must-Read Engineering Articles','Must-Read Distributed Systems Papers'].includes(s.name));
+  shell(h('div',{class:'panel'},h('div',{class:'crumbs'},h('a',{href:'#/'},'Home'),' / Library'),h('h2',{},'Library'),h('p',{class:'lead'},'Everything in the source list that is not a lesson: where to keep learning, plus the papers behind today\'s systems.'),
+    ...secs.map(s=>h('div',{style:'display:flex;flex-direction:column;gap:10px'},h('h3',{},s.name),h('div',{class:'lib'},s.items.map(it=>h('a',{class:'item',href:it.u,target:'_blank',rel:'noopener noreferrer'},h('b',{},it.t))))))
+    ));
+}
+function viewAbout(){
+  const ta=h('textarea',{rows:6,style:'width:100%;font:13px var(--f-mono);border-radius:10px;border:1px solid var(--line);padding:10px;background:var(--surface);color:var(--ink)','aria-label':'Progress JSON'});const msg=h('div',{class:'note'});
+  shell(h('div',{class:'panel'},h('div',{class:'crumbs'},h('a',{href:'#/'},'Home'),' / Progress'),h('h2',{},'Your progress'),h('p',{class:'lead'},'Progress is saved in this browser only. Download it as JSON to move devices or back it up, and load it back here.'),
+    h('div',{class:'row'},btn('Download progress',()=>{const b=new Blob([JSON.stringify({version:1,xp:S.xp,streak:S.streak,done:S.done},null,1)],{type:'application/json'});const a=h('a',{href:URL.createObjectURL(b),download:'system-design-progress.json'});document.body.append(a);a.click();a.remove();}),btn('Load from box below',()=>{try{const j=JSON.parse(ta.value);S.done=j.done||{};S.xp=j.xp||0;S.streak=j.streak||0;save();msg.textContent='Loaded.';}catch(e){msg.textContent='That is not valid progress JSON.';}},'ghost'),btn('Reset everything',()=>{if(confirm('Erase all progress?')){S.done={};S.xp=0;S.streak=0;S.last='';save();route();}},'danger')),ta,msg,
+    h('p',{class:'note'},'Numbers inside the demos are made up to teach an idea. They are not benchmarks.')));}
+function route(){const hash=location.hash||'#/';const m=hash.split('/');try{
+  if(m[1]==='p')viewPhase(+m[2]);else if(m[1]==='l')viewLesson(m[2]);else if(m[1]==='library')viewLibrary();else if(m[1]==='prereq')viewPrereq();else if(m[1]==='about')viewAbout();else viewHome();}
+  catch(e){root.textContent='Something went wrong: '+e.message;console.error(e);}}
+
+/* ===== Phase 0 demos ===== */
+const COL=['var(--l6)','var(--l0)','var(--l2)','var(--l8)','var(--l4)','var(--l3)','var(--l1)','var(--l7)'];
+const fmtTime=s=>s<1?`${(s*1000).toFixed(0)} ms`:s<90?`${s.toFixed(1)} s`:s<5400?`${(s/60).toFixed(1)} min`:s<172800?`${(s/3600).toFixed(1)} h`:`${(s/86400).toFixed(1)} days`;
+
+/* 1. Scalability: vertical vs horizontal with animated requests */
+DEMOS.scale=function(host){
+  let n=1,m=1,rps=300;const MAXM=8,CAP=100;const W=720,H=300;
+  const svg=svgBox(W,H);const layer=sv('g');const dots=[];let tick=0,rr=0;const rand=mkRand(7);
+  const rd=readout();const rpsC=ctl('Incoming requests/sec',0,1600,rps,50,v=>{rps=v;draw();},v=>v+' rps');
+  const bUp=btn('Bigger server (scale up)',()=>{if(m<MAXM){m*=2;draw();}});const bOut=btn('Add a server (scale out)',()=>{if(n<8){n++;draw();}},'ghost');const bReset=btn('Reset',()=>{n=1;m=1;draw();},'ghost');
+  function util(){return rps/(n*CAP*m);}
+  function draw(){layer.textContent='';const u=util();const cw=W/n;
+    layer.append(sv('rect',{x:W/2-70,y:12,width:140,height:34,rx:10,fill:'var(--accent-soft)',stroke:'var(--line)'}),sv('text',{x:W/2,y:34,'text-anchor':'middle','font-size':13,'font-weight':600,fill:'var(--ink)'},`Users: ${rps} rps`));
+    for(let i=0;i<n;i++){const x=cw*i+cw/2,bw=Math.min(110,cw-14),bh=60+14*Math.log2(m)*2.2;const col=u>1?'var(--bad)':u>.8?'var(--warn)':'var(--go)';
+      layer.append(sv('rect',{x:x-bw/2,y:150,width:bw,height:bh,rx:10,fill:'var(--surface)',stroke:col,'stroke-width':3}),
+        sv('rect',{x:x-bw/2+8,y:150+bh-18,width:Math.max(2,(bw-16)*Math.min(1,u)),height:8,rx:4,fill:col}),
+        sv('text',{x,y:172,'text-anchor':'middle','font-size':12,'font-weight':600,fill:'var(--ink)'},`Server ${i+1}`),
+        sv('text',{x,y:190,'text-anchor':'middle','font-size':11,fill:'var(--ink2)'},`size x${m}`));}
+    const cap=n*CAP*m;const served=Math.min(rps,cap);const cost=(n*Math.pow(m,1.4)).toFixed(1);
+    rd.set(`Capacity: ${cap} rps (${n} server${n>1?'s':''} x size ${m}). Served: ${served} rps. Dropped: ${Math.max(0,rps-cap)} rps.\nRelative cost: ${cost}. ${m>=MAXM?'Largest machine reached: scaling up is finished.':''}${n>=8?' Server limit for this demo reached.':''}`);
+    bUp.disabled=m>=MAXM;bOut.disabled=n>=8;}
+  const gDots=sv('g');svg.append(layer,gDots);
+  ctx.every(100,()=>{tick++;const spawn=Math.min(8,Math.round(rps/200));const u=util();
+    for(let k=0;k<spawn;k++){const s=rr++%n;dots.push({s,p:0,drop:u>1&&rand()<1-1/u});}
+    gDots.textContent='';const cw=W/n;
+    for(let i=dots.length-1;i>=0;i--){const d=dots[i];d.p+=.14;if(d.p>=1||(d.drop&&d.p>.7)){dots.splice(i,1);continue;}
+      const x=W/2+(cw*d.s+cw/2-W/2)*d.p,y=48+(150-48)*d.p;gDots.append(sv('circle',{cx:x,cy:y,r:4,fill:d.drop?'var(--bad)':'var(--accent)',opacity:1-(d.drop?d.p:0)*.8}));}});
+  host.append(svg,rpsC.el,h('div',{class:'row'},bUp,bOut,bReset),rd,h('div',{class:'note'},'Try 600 rps: one server drops requests. Scale up until you hit the biggest machine, then scale out. Scaling up is simple but has a ceiling and a rising price. Scaling out has no ceiling, but now you need a load balancer and servers that do not keep user data locally.'));
+  draw();
+};
+
+/* 2. Availability: nines and components in series / parallel */
+DEMOS.avail=function(host){
+  const nines=[90,99,99.9,99.99,99.999,99.9999];let ni=2,a=99.5,cnt=3;
+  const rd=readout(),rd2=readout();const svg=svgBox(720,120);
+  const c1=ctl('Target availability',0,5,ni,1,v=>{ni=v;draw();},v=>nines[v]+'%');
+  const c2=ctl('One component availability',90,99.99,a,0.01,v=>{a=v;draw();},v=>v.toFixed(2)+'%');
+  const c3=ctl('Components in a chain',1,6,cnt,1,v=>{cnt=v;draw();},v=>v+'');
+  function draw(){const A=nines[ni]/100,down=(1-A);const y=365*86400*down;
+    rd.set(`${nines[ni]}% available allows:\n  ${fmtTime(y)} of downtime per year\n  ${fmtTime(30*86400*down)} per 30-day month\n  ${fmtTime(86400*down)} per day`);
+    const p=a/100;const series=Math.pow(p,cnt);const par=1-Math.pow(1-p,2);const chainWithReplicas=Math.pow(par,cnt);
+    rd2.set(`Chain of ${cnt} components, each ${a.toFixed(2)}%:\n  One of each (in series): ${(series*100).toFixed(3)}%  (${fmtTime(365*86400*(1-series))} down per year)\n  Two of each (in parallel): ${(chainWithReplicas*100).toFixed(4)}%  (${fmtTime(365*86400*(1-chainWithReplicas))} down per year)`);
+    svg.textContent='';
+    for(let i=0;i<cnt;i++){const x=20+i*(680/cnt);svg.append(sv('rect',{x,y:30,width:680/cnt-16,height:44,rx:8,fill:'var(--accent-soft)',stroke:'var(--accent)'}),sv('text',{x:x+(680/cnt-16)/2,y:57,'text-anchor':'middle','font-size':12,fill:'var(--ink)'},'part '+(i+1)));if(i<cnt-1)svg.append(sv('path',{d:`M${x+680/cnt-16} 52 h16`,stroke:'var(--ink2)','stroke-width':2}));}
+    svg.append(sv('text',{x:20,y:105,'font-size':12,fill:'var(--ink2)'},`If any one part is down the whole chain is down, so availability multiplies: ${a.toFixed(2)}% ^ ${cnt} = ${(series*100).toFixed(2)}%`));}
+  host.append(c1.el,rd,svg,c2.el,c3.el,rd2,h('div',{class:'note'},'Each extra part you put in a chain lowers the total. Putting two copies of a part side by side, so either can serve, raises it sharply.'));draw();
+};
+
+/* 3. Reliability: retries over a flaky dependency */
+DEMOS.reliab=function(host){
+  let p=30,r=0,seed=1;const N=200;const g=h('div',{style:'display:grid;grid-template-columns:repeat(40,1fr);gap:3px'});const rd=readout();
+  const cp=ctl('Failure chance per attempt',0,60,p,5,v=>{p=v;run();},v=>v+'%');const cr=ctl('Retries allowed',0,4,r,1,v=>{r=v;run();},v=>v+'');
+  function run(){const rand=mkRand(seed*977);g.textContent='';let ok=0,attempts=0;for(let i=0;i<N;i++){let done=false,a=0;for(let k=0;k<=r;k++){a++;if(rand()>=p/100){done=true;break;}}attempts+=a;if(done)ok++;g.append(h('span',{style:`aspect-ratio:1;border-radius:3px;background:${done?'var(--go)':'var(--bad)'};opacity:${a>1&&done?.55:1}`,title:`${a} attempt${a>1?'s':''}`}));}
+    const exp=1-Math.pow(p/100,r+1);rd.set(`Succeeded: ${ok} of ${N} (${(100*ok/N).toFixed(1)}%). Expected: ${(100*exp).toFixed(1)}%.\nAverage attempts per request: ${(attempts/N).toFixed(2)} (extra load on the dependency).\nPale green = needed a retry to succeed.`);}
+  host.append(cp.el,cr.el,g,rd,h('div',{class:'row'},btn('Run another 200',()=>{seed++;run();})),h('div',{class:'note'},'Reliable means it keeps giving correct results, even when parts misbehave. Retries and redundancy raise success, at the cost of extra load. Retrying an action that is not safe to repeat, like charging a card, can make results wrong. That is why idempotency matters later.'));run();
+};
+
+/* 4. SPOF: kill nodes, see if the system survives */
+DEMOS.spof=function(host){
+  const tiers=[{name:'Load balancer',n:1},{name:'App server',n:1},{name:'Database',n:1}];const alive=tiers.map(t=>[true]);
+  const svg=svgBox(720,240);const rd=readout();let dotT=0;const gD=sv('g');
+  function up(i){return alive[i].some(Boolean);}
+  function draw(){svg.textContent='';const sysUp=tiers.every((_,i)=>up(i));
+    svg.append(sv('rect',{x:14,y:85,width:80,height:50,rx:10,fill:'var(--accent-soft)',stroke:'var(--line)'}),sv('text',{x:54,y:115,'text-anchor':'middle','font-size':13,'font-weight':600,fill:'var(--ink)'},'Users'));
+    tiers.forEach((t,i)=>{const x=170+i*190;for(let k=0;k<t.n;k++){const y=110-(t.n-1)*34+k*68-26;const ok=alive[i][k];
+      const node=sv('g',{style:'cursor:pointer',tabindex:0,role:'button','aria-label':`${t.name} ${k+1}: ${ok?'running':'down'}. Press to toggle.`,onclick:()=>{alive[i][k]=!alive[i][k];draw();},onkeydown:e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();alive[i][k]=!alive[i][k];draw();}}},
+        sv('rect',{x,y,width:140,height:52,rx:10,fill:ok?'var(--surface)':'var(--bad-soft)',stroke:ok?'var(--go)':'var(--bad)','stroke-width':3}),
+        sv('text',{x:x+70,y:y+22,'text-anchor':'middle','font-size':13,'font-weight':600,fill:'var(--ink)'},t.name),sv('text',{x:x+70,y:y+40,'text-anchor':'middle','font-size':11,fill:'var(--ink2)'},ok?'running (click to kill)':'DOWN (click to revive)'));
+      svg.append(sv('path',{d:`M${i===0?94:x-50} 110 L${x} ${y+26}`,stroke:'var(--line)','stroke-width':2,fill:'none'}),node);}});
+    svg.append(sv('text',{x:14,y:226,'font-size':13,'font-weight':700,fill:sysUp?'var(--go)':'var(--bad)'},sysUp?'System is serving users.':'System is DOWN: '+tiers.filter((_,i)=>!up(i)).map(t=>t.name).join(', ')+' has no healthy copy.'),gD);
+    const spofs=tiers.filter(t=>t.n===1).map(t=>t.name);rd.set(spofs.length?`Single points of failure right now: ${spofs.join(', ')}.`:'No tier has only one copy. Now try killing every copy in one tier.');}
+  ctx.every(120,()=>{dotT=(dotT+1)%30;gD.textContent='';let x=94;const ok=[true,...tiers.map((_,i)=>up(i))];let stop=tiers.findIndex((_,i)=>!up(i));const maxX=stop<0?170+2*190+140:170+stop*190;const px=94+(maxX-94)*dotT/29;gD.append(sv('circle',{cx:px,cy:110,r:4,opacity:.75,fill:stop<0?'var(--accent)':'var(--bad)'}));});
+  const row=h('div',{class:'row'},tiers.map((t,i)=>btn(`Add a 2nd ${t.name.toLowerCase()}`,function(){if(t.n<2){t.n=2;alive[i].push(true);this.disabled=true;draw();}},'ghost')),btn('Reset',()=>{tiers.forEach((t,i)=>{t.n=1;alive[i]=[true];});[...row.querySelectorAll('button')].forEach(b=>b.disabled=false);draw();}));
+  host.append(svg,row,rd,h('div',{class:'note'},'Click any box to kill it. With one copy per tier, killing anything stops the system. Add a second copy and a single failure no longer matters.'));draw();
+};
+
+/* 5. Latency, throughput, bandwidth */
+DEMOS.lat=function(host){
+  let lat=100,bw=50,conc=1,mode=0;const W=720,H=190;const svg=svgBox(W,H);const rd=readout();const pk=[];let t=0;
+  const cl=ctl('Latency (one-way delay)',10,500,lat,10,v=>{lat=v;sum();},v=>v+' ms');const cb=ctl('Bandwidth',1,100,bw,1,v=>{bw=v;sum();},v=>v+' Mbps');const cc=ctl('Requests in flight at once',1,20,conc,1,v=>{conc=v;sum();},v=>v+'');
+  function sum(){const rtt=2*lat;const small=0.001*8/bw*1000; // 1KB request time on wire (ms)
+    const per=rtt+small;const rps=conc*1000/per;const big=rtt+ (50*8/bw)*1000; // 50MB file
+    rd.set(`Round trip: ${rtt} ms.\nSmall 1 KB requests, ${conc} at a time: about ${rps.toFixed(1)} requests per second. Bandwidth barely matters here.\nOne 50 MB file: ${(big/1000).toFixed(1)} s. Latency barely matters here.\nRule: many small calls are limited by latency and concurrency, one large transfer by bandwidth.`);}
+  svg.append(sv('text',{x:20,y:24,'font-size':12,fill:'var(--ink2)'},'Client'),sv('text',{x:W-70,y:24,'font-size':12,fill:'var(--ink2)'},'Server'));
+  const pipe=sv('rect',{x:70,y:80,width:W-140,height:30,rx:6,fill:'var(--accent-soft)',stroke:'var(--accent)'});const gp=sv('g');svg.append(pipe,gp);
+  ctx.every(50,()=>{t++;const ph=Math.max(6,Math.round(48-bw*.4));pipe.setAttribute('height',Math.max(12,Math.min(80,8+bw*.7)));pipe.setAttribute('y',95-Math.max(12,Math.min(80,8+bw*.7))/2);
+    const travel=Math.max(6,lat/12);const gap=Math.max(2,Math.round(travel*2/conc/1));
+    if(t%gap===0)pk.push({p:0,back:false});
+    gp.textContent='';for(let i=pk.length-1;i>=0;i--){const q=pk[i];q.p+=1/travel;if(q.p>=1){if(!q.back){q.back=true;q.p=0;}else{pk.splice(i,1);continue;}}const x=q.back?W-70-(W-140)*q.p:70+(W-140)*q.p;gp.append(sv('circle',{cx:x,cy:95+(q.back?10:-10)*0,r:5,fill:q.back?'var(--go)':'var(--accent)'}));}
+    if(pk.length>60)pk.splice(0,pk.length-60);});
+  svg.append(sv('text',{x:W/2,y:170,'text-anchor':'middle','font-size':12,fill:'var(--ink2)'},'Blue dots are requests going out, green dots are responses coming back. Pipe width is bandwidth.'));
+  host.append(svg,cl.el,cb.el,cc.el,rd,h('div',{class:'note'},'Latency is how long one trip takes. Bandwidth is how much the pipe can carry. Throughput is how much actually gets through, and it depends on both plus how many requests overlap.'));sum();
+};
+
+/* 6. Consistent hashing */
+function mix32(x){x^=x>>>16;x=Math.imul(x,0x7feb352d);x^=x>>>15;x=Math.imul(x,0x846ca68b);x^=x>>>16;return x>>>0;}
+const H32=s=>mix32(fnv(s));
+DEMOS.ring=function(host){
+  const KEYS=Array.from({length:48},(_,i)=>'key-'+i);const names=['A','B','C','D','E','F','G','H'];let nodes=['A','B','C'];let vn=1;let prevC=null,prevM=null;
+  const svg=svgBox(360,360);svg.style.maxWidth='440px';svg.style.margin='0 auto';const rd=readout(),counts=h('div',{class:'chips'});
+  function build(){const pts=[];nodes.forEach(n=>{for(let v=0;v<vn;v++)pts.push({n,h:H32(n+'#'+v)});});pts.sort((a,b)=>a.h-b.h);return pts;}
+  function owner(pts,k){const hk=H32(k);for(const p of pts)if(p.h>=hk)return p.n;return pts[0].n;}
+  const mod=k=>nodes[H32(k)%nodes.length];
+  function ang(hh){return hh/4294967296*Math.PI*2-Math.PI/2;}
+  function draw(note){const pts=build();svg.textContent='';const cx=180,cy=180,R=125;
+    svg.append(sv('circle',{cx,cy,r:R,fill:'none',stroke:'var(--line)','stroke-width':3}));
+    pts.forEach(p=>{const a=ang(p.h);svg.append(sv('circle',{cx:cx+R*Math.cos(a),cy:cy+R*Math.sin(a),r:vn>1?5:11,fill:COL[names.indexOf(p.n)],stroke:'var(--surface)','stroke-width':2}));if(vn===1)svg.append(sv('text',{x:cx+R*Math.cos(a),y:cy+R*Math.sin(a)+4,'text-anchor':'middle','font-size':11,'font-weight':700,fill:'var(--on-fill)'},p.n));});
+    const cur={},curM={};const cnt={};nodes.forEach(n=>cnt[n]=0);
+    KEYS.forEach(k=>{const o=owner(pts,k);cur[k]=o;curM[k]=mod(k);cnt[o]++;const a=ang(H32(k));svg.append(sv('circle',{cx:cx+(R-22)*Math.cos(a),cy:cy+(R-22)*Math.sin(a),r:3.2,fill:COL[names.indexOf(o)]}));});
+    svg.append(sv('text',{x:cx,y:cy-4,'text-anchor':'middle','font-size':12,fill:'var(--ink2)'},'48 keys'),sv('text',{x:cx,y:cy+14,'text-anchor':'middle','font-size':10.5,fill:'var(--ink2)'},'each goes to the next'),sv('text',{x:cx,y:cy+28,'text-anchor':'middle','font-size':10.5,fill:'var(--ink2)'},'server clockwise'));
+    counts.textContent='';nodes.forEach(n=>counts.append(h('span',{class:'chip',style:`border-color:${COL[names.indexOf(n)]}`},`${n}: ${cnt[n]} keys`)));
+    if(prevC){let mv=0,mm=0;KEYS.forEach(k=>{if(prevC[k]!==cur[k])mv++;if(prevM[k]!==curM[k])mm++;});rd.set(`${note}\nConsistent hashing moved ${mv} of 48 keys (${Math.round(mv/.48)}%).\nSimple "hash mod N" would have moved ${mm} of 48 keys (${Math.round(mm/.48)}%).`);}else rd.set('Add or remove a server and compare how many keys have to move.');
+    prevC=cur;prevM=curM;}
+  const add=btn('Add a server',()=>{if(nodes.length<8){const n=names.find(x=>!nodes.includes(x));nodes.push(n);draw('Added server '+n+'.');}});const rem=btn('Remove last server',()=>{if(nodes.length>1){const n=nodes.pop();draw('Removed server '+n+'.');}},'ghost');
+  const cv=ctl('Virtual nodes per server',1,40,vn,1,v=>{vn=v;prevC=null;draw();},v=>v+'');
+  host.append(svg,h('div',{class:'row'},add,rem),cv.el,counts,rd,h('div',{class:'note'},'With one point per server the keys split unevenly. Raise virtual nodes and each server owns many small slices, so the load evens out and a new server takes a little from everyone.'));draw();
+};
+
+/* 7. CAP theorem */
+DEMOS.cap=function(host){
+  let mode='CP',cut=false;const st={A:1,B:1};const log=logbox();const svg=svgBox(720,170);
+  function draw(){svg.textContent='';['A','B'].forEach((k,i)=>{const x=i?500:60;svg.append(sv('rect',{x,y:40,width:160,height:90,rx:12,fill:'var(--surface)',stroke:'var(--accent)','stroke-width':3}),sv('text',{x:x+80,y:68,'text-anchor':'middle','font-size':14,'font-weight':700,fill:'var(--ink)'},'Replica '+k),sv('text',{x:x+80,y:108,'text-anchor':'middle','font-size':28,'font-weight':700,fill:'var(--accent)'},'x = '+st[k]));});
+    svg.append(sv('line',{x1:220,y1:85,x2:500,y2:85,stroke:cut?'var(--bad)':'var(--go)','stroke-width':4,'stroke-dasharray':cut?'8 8':null}),sv('text',{x:360,y:75,'text-anchor':'middle','font-size':12,fill:cut?'var(--bad)':'var(--go)','font-weight':600},cut?'NETWORK PARTITION':'connected'));}
+  const tabsEl=tabs(['CP: choose consistency','AP: choose availability'],i=>{mode=i?'AP':'CP';log.say(`Mode: ${mode==='CP'?'CP, refuse to answer if unsure':'AP, always answer, maybe stale'}`,'dim');});
+  const bw=btn('Write x = 2 on A',()=>{if(cut){if(mode==='CP'){log.say('Write on A rejected. A cannot reach B, so it cannot promise both stay equal. System is unavailable for writes.','bad');}else{st.A=2;log.say('Write accepted on A (x=2). B still says 1. System stayed available, but replicas now disagree.','ok');}}else{st.A=2;st.B=2;log.say('Write on A copied to B. Both x=2.','ok');}draw();});
+  const br=btn('Read x from B',()=>{if(cut&&mode==='CP'&&st.A!==st.B){log.say('Read on B refused: B knows it may be behind. Better an error than a wrong answer.','bad');}else log.say(`Read on B returned x=${st.B}${st.B!==st.A?' (STALE: A has '+st.A+')':''}.`,st.B!==st.A?'bad':'ok');},'ghost');
+  const bc=btn('Cut the network',()=>{cut=true;log.say('Partition! A and B cannot talk.','bad');draw();},'ghost');const bh=btn('Heal the network',()=>{cut=false;st.B=st.A;log.say('Network healed. B catches up to x='+st.A+'.','ok');draw();},'ghost');const bz=btn('Reset',()=>{cut=false;st.A=1;st.B=1;log.clear();draw();},'ghost');
+  host.append(tabsEl,svg,h('div',{class:'row'},bw,br,bc,bh,bz),log,h('div',{class:'note'},'Try: cut the network, write on A, read on B. Partitions will happen on real networks, so the real choice is what to do while one is happening: refuse (consistent) or answer anyway (available).'));draw();
+};
+
+/* 8. Failover timeline */
+DEMOS.failover=function(host){
+  let to=3,mode=0,t=-1,running=false;const rd=readout();const W=720;const svg=svgBox(W,200);
+  const ct=ctl('Failure-detection timeout',1,10,to,1,v=>{to=v;t=-1;draw();},v=>v+' s');
+  const tb=tabs(['Active-passive (standby promoted)','Active-active (both serve traffic)'],i=>{mode=i;t=-1;draw();});
+  function phases(){return mode===0?[['Healthy',0,'var(--go)'],['Detect failure',to,'var(--warn)'],['Promote standby',3,'var(--warn)'],['Redirect clients',2,'var(--warn)'],['Healthy again',0,'var(--go)']]:[['Healthy',0,'var(--go)'],['Detect failure',to,'var(--warn)'],['Remove from rotation',1,'var(--warn)'],['Healthy on 1 node',0,'var(--go)']];}
+  function draw(){const ph=phases();const total=ph.reduce((a,p)=>a+p[1],0);svg.textContent='';let x=20;const scale=(W-40)/Math.max(total,1);
+    ph.forEach((p,i)=>{const w=Math.max(p[1]*scale,i===0||i===ph.length-1?60:0);});
+    const mid=ph.filter(p=>p[1]>0);let cx=20;mid.forEach(p=>{const w=p[1]*scale;svg.append(sv('rect',{x:cx,y:60,width:w,height:46,fill:p[2],opacity:.85,rx:4}),sv('text',{x:cx+w/2,y:88,'text-anchor':'middle','font-size':11.5,'font-weight':600,fill:'#fff'},`${p[0]} ${p[1]}s`));cx+=w;});
+    if(t>=0){const px=20+Math.min(t,total)*scale;svg.append(sv('line',{x1:px,y1:44,x2:px,y2:130,stroke:'var(--bad)','stroke-width':3}),sv('text',{x:px,y:40,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'var(--bad)'},t>=total?'recovered':'down'));}
+    svg.append(sv('text',{x:20,y:160,'font-size':13,fill:'var(--ink)','font-weight':600},`Users see errors or slowness for about ${total} seconds.`),sv('text',{x:20,y:180,'font-size':12,fill:'var(--ink2)'},mode===0?'Standby waits idle, so there is a promotion step.':'The second node already serves traffic, so only detection and removal remain.'));
+    rd.set(`Total disruption: ${total} s (detection ${to} s + ${total-to} s of switching).\nA shorter timeout recovers faster but risks false alarms when the network is merely slow.`);}
+  const go=btn('Crash the primary',()=>{t=0;draw();});
+  ctx.every(250,()=>{if(t>=0){const total=phases().reduce((a,p)=>a+p[1],0);if(t<total){t+=.5;draw();}}});
+  host.append(tb,ct.el,svg,h('div',{class:'row'},go,btn('Reset',()=>{t=-1;draw();},'ghost')),rd);draw();
+};
+
+/* 9. Fault tolerance with replicas and quorum */
+DEMOS.ft=function(host){
+  let n=5,rule=1;let dead=new Set();const svg=svgBox(720,170);const rd=readout();
+  const cn=ctl('Number of replicas',3,7,n,1,v=>{n=v;dead=new Set();draw();},v=>v+'');
+  const tb=tabs(['Works if any 1 is alive','Works if a majority is alive','Needs every replica'],i=>{rule=i;draw();},1);
+  function need(){return rule===0?1:rule===1?Math.floor(n/2)+1:n;}
+  function draw(){svg.textContent='';const alive=n-dead.size;const ok=alive>=need();const bw=Math.min(90,640/n-10);
+    for(let i=0;i<n;i++){const x=40+i*(640/n)+(640/n-bw)/2;const d=dead.has(i);svg.append(sv('g',{style:'cursor:pointer',tabindex:0,role:'button','aria-label':`Replica ${i+1} ${d?'down':'up'}`,onclick:()=>{d?dead.delete(i):dead.add(i);draw();},onkeydown:e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();d?dead.delete(i):dead.add(i);draw();}}},sv('rect',{x,y:30,width:bw,height:60,rx:10,fill:d?'var(--bad-soft)':'var(--surface)',stroke:d?'var(--bad)':'var(--go)','stroke-width':3}),sv('text',{x:x+bw/2,y:66,'text-anchor':'middle','font-size':13,'font-weight':600,fill:'var(--ink)'},d?'DOWN':'R'+(i+1))));}
+    svg.append(sv('text',{x:40,y:125,'font-size':14,'font-weight':700,fill:ok?'var(--go)':'var(--bad)'},ok?`System keeps working: ${alive} alive, needs ${need()}.`:`System stops: only ${alive} alive, needs ${need()}.`),sv('text',{x:40,y:148,'font-size':12,fill:'var(--ink2)'},'Click replicas to fail or revive them.'));
+    const tol=n-need();rd.set(`This design tolerates ${tol} failure${tol===1?'':'s'} out of ${n}.\n${rule===1?'With a majority rule, 4 replicas tolerate no more than 3 do, which is why clusters use odd sizes.':rule===0?'Any-one works for stateless copies. Copies of data need agreement, so they use a majority.':'This is no fault tolerance at all: every failure is an outage.'}`);}
+  host.append(cn.el,tb,svg,rd,h('div',{class:'note'},'Fault tolerance means the system keeps going through failures. High availability is the broader goal of staying up, which failover can reach with a short blip. Fault tolerance aims for no blip, at higher cost.'));draw();
+};
+
+/* ===== phases (all planned; only phase 0 has lessons so far) ===== */
+phase({name:'Core Concepts',sub:'The vocabulary every other topic builds on.',g:0,sec:'Core Concepts',pre:['How the web works (browser asks, server answers)','Percentages and powers of 10'],intro:'Nine ideas you will use in every design: how to grow, how to stay up, how to keep data balanced across machines, and what you give up when the network breaks.'});
+phase({name:'Networking Fundamentals',sub:'How bytes get from a browser to your servers.',g:0,sec:'Networking Fundamentals',pre:['Phase 0: latency and availability']});
+phase({name:'API Fundamentals',sub:'How services talk, and how to keep them safe.',g:1,sec:'API Fundamentals',pre:['Phase 1: HTTP and DNS']});
+phase({name:'Database Fundamentals',sub:'Storing data, finding it fast, and spreading it out.',g:2,sec:'Database Fundamentals',pre:['Basic SQL (SELECT, JOIN)','Phase 0: availability and consistency']});
+phase({name:'Caching Fundamentals',sub:'Doing less work by remembering answers.',g:2,sec:'Caching Fundamentals',pre:['Phase 3: indexes and replication help']});
+phase({name:'Asynchronous Communication',sub:'Queues, topics and event streams.',g:1,sec:'Asynchronous Communication',pre:['Phase 2: APIs']});
+phase({name:'Distributed Systems and Microservices',sub:'Many machines that must agree and survive.',g:3,sec:'Distributed System and Microservices',pre:['Phase 0','Phase 3: replication','Phase 5: queues']});
+phase({name:'Architectural Patterns',sub:'Shapes a whole system can take.',g:3,sec:'Architectural Patterns',pre:['Phases 1 to 6']});
+phase({name:'System Design Tradeoffs',sub:'Every choice costs something. Learn the price list.',g:4,sec:'System Design Tradeoffs',pre:['Phases 0 to 7']});
+phase({name:'Interview Framework',sub:'A repeatable way to answer any design question.',g:5,sec:'How to Answer a System Design Interview Problem',pre:['Phases 0 to 8']});
+phase({name:'Interview Problems: Easy',sub:'Ten warm-ups that use one or two ideas each.',g:5,sec:'System Design Interview Problems',grp:'Easy',pre:['Phases 0 to 9']});
+phase({name:'Interview Problems: Medium',sub:'Twenty-three product-style designs.',g:5,sec:'System Design Interview Problems',grp:'Medium',pre:['Phases 0 to 9','Easy problems']});
+phase({name:'Interview Problems: Hard',sub:'Twelve designs with real scale or hard coordination.',g:5,sec:'System Design Interview Problems',grp:'Hard',pre:['Phases 0 to 9','Medium problems']});
+
+/* ===== Phase 0 lessons ===== */
+lesson(0,{key:'Scalability',short:'Scalability',tag:'Core concept 1 of 9',title:'Scalability: handling more load without falling over',
+  lead:'A system is scalable if it keeps working well as traffic, data or users grow. There are two ways to grow: make one machine bigger (scale up, also called vertical) or add more machines (scale out, also called horizontal).',
+  more:['Scaling up is the easy first move: no code changes, just a bigger box. But machines have a maximum size and prices climb steeply near the top. Scaling out has no hard ceiling and gives you spare capacity if one machine dies, but your app now has to work across many machines.'],
+  demo:'scale',takeaway:'Scale up first because it is simple. Scale out when you run out of bigger machines or need redundancy. Scaling out only works if servers are interchangeable.',
+  pre:[],
+  quiz:[{q:'Traffic doubles and your single biggest available machine is already at 90% load. What is your next move?',o:['Buy an even bigger machine','Add more machines behind a load balancer','Turn off the slowest feature'],a:1,why:'You have hit the vertical ceiling, so the remaining path is to add machines.',hint:'There is a limit to how big one machine can get.'},
+        {q:'Which is a real benefit of scaling out over scaling up?',o:['It needs no change to the application','Losing one machine does not take everything down','It is always cheaper'],a:1,why:'Several machines give you redundancy. The cost is more moving parts, and it is not always cheaper.'}],
+  terms:[['Vertical scaling','Bigger machine: more CPU, memory, disk.'],['Horizontal scaling','More machines sharing the work.'],['Load balancer','Spreads incoming requests across machines.']]});
+
+lesson(0,{key:'Availability',short:'Availability',tag:'Core concept 2 of 9',title:'Availability: the percentage of time you are up',
+  lead:'Availability is how much of the time a system can serve requests, usually written as a percentage. People talk in nines: 99.9% is three nines, 99.99% is four nines.',
+  more:['Each extra nine cuts allowed downtime by ten times. 99.9% allows almost nine hours a year, 99.99% allows under an hour, 99.999% allows about five minutes. And parts chained together multiply their availability, so a long chain is less available than any single part.'],
+  demo:'avail',takeaway:'Know the downtime for each nine. Chains of dependencies lower availability, and redundancy raises it.',
+  pre:['Scalability'],vid:'52kjR5SVUlg',
+  quiz:[{q:'Roughly how much downtime per year does 99.99% availability allow?',o:['About 9 hours','About 52 minutes','About 5 minutes'],a:1,why:'0.01% of a year is about 52.6 minutes. 99.9% is about 8.8 hours and 99.999% about 5.3 minutes.',hint:'Each extra nine divides downtime by ten.'},
+        {q:'Three services each at 99.9% are all required for a request to work. What is the combined availability?',o:['Exactly 99.9%','About 99.7%','About 99.99%'],a:1,why:'You multiply: 0.999 x 0.999 x 0.999 is about 0.997. Dependencies in a chain make the total worse.'}],
+  terms:[['Nines','Shorthand for availability: 3 nines is 99.9%.'],['SLA','The uptime promise in a contract.'],['Redundancy','Spare copies so one failure is not an outage.']]});
+
+lesson(0,{key:'Reliability',short:'Reliability',tag:'Core concept 3 of 9',title:'Reliability: doing the right thing, consistently',
+  lead:'Reliability means the system gives correct results over time, even when parts fail or users do odd things. It is related to availability but not the same: a system that is up but returns wrong answers is available and not reliable.',
+  more:['You build reliability with redundancy, retries, timeouts, validation, backups and good monitoring. The catch is that every one of these has side effects. Retries add load, and retrying a payment can charge twice if the action is not safe to repeat.'],
+  demo:'reliab',takeaway:'Reliable systems keep returning correct results through failure. Retries help but add load and need safe, repeatable operations.',
+  pre:['Availability'],vid:'52kjR5SVUlg',
+  quiz:[{q:'A service is up 100% of the time but sometimes returns stale prices. What is true?',o:['It is highly available but not fully reliable','It is neither available nor reliable','It is reliable but not available'],a:0,why:'It answers every request (available) but not always correctly (not reliable).'},
+        {q:'Why can blind retries make a payment system less reliable?',o:['Retries never help','The same charge can be applied twice','Retries slow down the network permanently'],a:1,why:'If the first attempt actually succeeded but the reply got lost, a retry repeats the action. The fix is idempotency, covered in the API phase.',hint:'What if the reply was lost, not the request?'}],
+  terms:[['Retry','Sending the same request again after a failure.'],['Timeout','Giving up on a call after a set wait.']]});
+
+lesson(0,{key:'SPOF',short:'SPOF',tag:'Core concept 4 of 9',title:'Single point of failure (SPOF)',
+  lead:'A single point of failure is any one part whose failure takes the whole system down. It can be a server, a database, a network link, a config file, or even one person who knows the password.',
+  more:['You find them by walking a request through the system and asking: if this box dies, what happens? You remove them by running at least two of anything important and making sure traffic can move between them. Watch out for hidden ones: a second app server does not help if both talk to a single database.'],
+  demo:'spof',takeaway:'Walk the request path and ask what happens if each part dies. Two of everything on the path removes the single points.',
+  pre:['Availability'],vid:'Iy2YqgjXtRM',
+  quiz:[{q:'You run 10 app servers but one database. Is there a SPOF?',o:['No, 10 servers is plenty','Yes, the database','Yes, but only if the servers are in one rack'],a:1,why:'All 10 servers depend on the one database, so its failure stops everything.'},
+        {q:'You add a second load balancer in front of your servers. What new problem do you need to solve?',o:['Deciding which load balancer users reach, and failing over between them','Nothing, it is automatic','Removing the app servers'],a:0,why:'Redundant parts only help if traffic can move to the survivor, so you need a way to switch, for example shared addresses or DNS.'}],
+  terms:[['Redundancy','Running more than one copy of a part.'],['Blast radius','How much breaks when one part fails.']]});
+
+lesson(0,{key:'Latency vs Throughput vs Bandwidth',short:'Latency vs Throughput',tag:'Core concept 5 of 9',title:'Latency vs throughput vs bandwidth',
+  lead:'Latency is the time one request takes. Bandwidth is the maximum amount of data the connection can carry per second. Throughput is how much work actually gets done per second.',
+  more:['Picture a pipe. Bandwidth is how wide it is, latency is how long it is, and throughput is how much water actually comes out per second. A wide pipe does not make a single trip faster, and a short trip does not mean you can move a lot at once.'],
+  demo:'lat',takeaway:'Many tiny calls are limited by latency. One huge download is limited by bandwidth. To raise throughput for small calls, overlap them.',
+  pre:['Scalability'],vid:'aq8KC7NLaBw',
+  quiz:[{q:'You fetch 1,000 tiny records one after another across the ocean (200 ms round trip). Which upgrade helps most?',o:['Double the bandwidth','Send many requests at the same time or batch them','Compress the responses'],a:1,why:'Each trip costs about 200 ms regardless of size, so overlapping or batching cuts the total time.'},
+        {q:'Which statement is correct?',o:['Higher bandwidth always means lower latency','Throughput can never exceed bandwidth','Latency and throughput are the same thing'],a:1,why:'Bandwidth is the ceiling. Throughput is what you really get, and it is at or below it.'}],
+  terms:[['Round trip time (RTT)','Time for a request to go out and the reply to come back.'],['Throughput','Work completed per second.']]});
+
+lesson(0,{key:'Consistent Hashing',short:'Consistent Hashing',tag:'Core concept 6 of 9',title:'Consistent hashing: adding servers without a big reshuffle',
+  lead:'When data or traffic is split across servers using "hash(key) mod N", changing N moves almost every key. That is painful for caches and databases. Consistent hashing places both servers and keys on a ring, and each key goes to the next server clockwise.',
+  more:['Adding a server only takes keys from its neighbour, and removing a server only hands its keys to the next one. In practice each server appears many times on the ring (virtual nodes) so the split is even, and bigger machines can be given more points.'],
+  demo:'ring',takeaway:'Use consistent hashing when servers come and go. Only about 1/N of keys move, and virtual nodes keep the load even.',
+  pre:['Scalability'],vid:'_PtlQY59_8c',
+  quiz:[{q:'With "hash mod N" you go from 4 servers to 5. Roughly what fraction of keys change server?',o:['About 20%','About 80%','Almost none'],a:1,why:'Most keys land on a different remainder when N changes, so around four in five move. Consistent hashing moves about one in five.',hint:'Compare how many keys keep the same remainder.'},
+        {q:'What do virtual nodes fix?',o:['Uneven load caused by random placement on the ring','Slow hash functions','Network partitions'],a:0,why:'Many small points per server average out, so each server gets close to its fair share.'}],
+  terms:[['Hash ring','Hash values arranged in a circle.'],['Virtual node','One server placed at many points on the ring.']]});
+
+lesson(0,{key:'CAP Theorem',short:'CAP Theorem',tag:'Core concept 7 of 9',title:'CAP theorem: what happens when the network breaks',
+  lead:'CAP says that when a network partition splits a distributed data store, you can keep either consistency (every read sees the latest write) or availability (every request gets an answer), not both.',
+  more:['Partitions are not optional on real networks, so the question is what to do during one. A CP system refuses requests it cannot answer correctly. An AP system answers anyway and may return stale data, then repairs differences later. Without a partition you can have both, and many systems also trade latency for consistency even when everything is healthy.'],
+  demo:'cap',takeaway:'During a partition, choose: error or stale. Pick by the cost of being wrong. Bank balances lean CP; social feeds lean AP.',
+  pre:['Availability','Reliability'],vid:'DpzMkfhV4Tg',
+  quiz:[{q:'A network partition happens. Your system keeps accepting writes on both sides. Which did you choose?',o:['Consistency','Availability','Neither'],a:1,why:'Both sides answer, so it is available. The sides may disagree, so consistency is given up until they sync.'},
+        {q:'Which system is the better fit for AP?',o:['Account balance for payments','Like counts on posts','Seat inventory for the last ticket'],a:1,why:'A like count that is briefly off hurts nobody. Balances and the last seat need one correct answer.'}],
+  terms:[['Partition','Parts of the system cannot talk to each other.'],['Stale read','Getting an older value than the latest write.']]});
+
+lesson(0,{key:'Failover',short:'Failover',tag:'Core concept 8 of 9',title:'Failover: switching to the spare',
+  lead:'Failover moves work from a failed component to a standby. In active-passive, the standby sits idle and is promoted when the primary dies. In active-active, both serve traffic, so losing one just means the other takes it all.',
+  more:['The time you are down is the time to notice, plus the time to switch. A short detection timeout speeds recovery but risks false alarms on a slow network, and a false alarm with two nodes both thinking they are primary (split brain) can corrupt data.'],
+  demo:'failover',takeaway:'Failover time is detection plus switching. Active-active is faster but needs spare capacity on every node.',
+  pre:['SPOF'],vid:'Zgy1miPsTNs',
+  quiz:[{q:'What is the main cost of active-active compared with active-passive?',o:['Slower failover','Each node must have room to absorb the other\'s traffic','No redundancy at all'],a:1,why:'If two nodes each run at 80% and one dies, the survivor needs 160%. You must keep spare headroom.'},
+        {q:'You shorten the failure-detection timeout from 10 s to 1 s. What risk goes up?',o:['False failovers on a slow but healthy node','Longer recovery','Higher bandwidth cost'],a:0,why:'A node that is merely slow can be declared dead and replaced while still running.'}],
+  terms:[['Active-passive','Spare waits idle until needed.'],['Split brain','Two nodes both believe they are the primary.']]});
+
+lesson(0,{key:'Fault Tolerance',short:'Fault Tolerance',tag:'Core concept 9 of 9',title:'Fault tolerance: keep going through failure',
+  lead:'A fault-tolerant system keeps operating, ideally without users noticing, when components fail. High availability aims to be up almost always; fault tolerance aims for no interruption at all, which usually costs more.',
+  more:['A common technique is replication with a majority rule: with 5 copies you can lose 2 and still have a majority that agrees. That is why clusters use odd sizes: 4 copies tolerate no more failures than 3.'],
+  demo:'ft',takeaway:'Fault tolerance comes from redundancy plus a rule for agreement. Use odd cluster sizes and size the cluster for the failures you must survive.',
+  pre:['Failover','SPOF'],vid:'VcJNu68WKrs',
+  quiz:[{q:'How many replicas can fail in a 5-node majority-rule cluster before it stops?',o:['1','2','3'],a:1,why:'You need 3 of 5. Lose 2 and 3 remain, lose 3 and only 2 remain.'},
+        {q:'Why do clusters usually have an odd number of nodes?',o:['Odd numbers are faster','An even size tolerates no more failures than the odd size below it','The network requires it'],a:1,why:'A majority of 4 is 3, the same failures tolerated as a cluster of 3, but with one more machine to pay for.'}],
+  terms:[['Quorum','The minimum number of nodes that must agree.'],['Replica','A copy of a service or its data.']]});
+
+/* ===== Phase 0: in-depth sections and senior interview questions ===== */
+function enrich(key,deep,iq){const l=BYKEY[key];if(!l)throw new Error('enrich: no lesson '+key);l.deep=deep;l.iq=iq;}
+
+enrich('Scalability',[
+ {h:'Start with the bottleneck, not the technique',p:['Scaling is not one skill, it is finding what saturates first and relieving that. A request can be limited by CPU, memory, disk I/O, network, database connections, a lock, or a downstream service. Adding servers to a tier that is not the bottleneck changes nothing.'],
+  ul:['Measure utilisation and saturation per resource (CPU, memory, disk, network, queue depth, connection pool use).','Look at tail latency (p99), not only averages, because queues build before the average moves.','Load test in steps (2x, 5x, 10x) and note which resource saturates first.']},
+ {h:'Stateless tiers scale out easily, stateful tiers do not',p:['If any server can handle any request, you add servers behind a load balancer and you are done. That requires keeping user sessions, uploads and caches off the local machine (use a shared store or signed tokens).','Data is the hard part. Reads scale with replicas and caches. Writes scale only by splitting the data (partitioning or sharding), which brings its own problems: cross-shard queries, rebalancing, and hot keys.']},
+ {h:'Why scaling is rarely linear',p:['Two effects bend the curve. Contention: parts of the work serialise on a lock, a single database primary, or a shared counter, so the serial fraction caps speedup (Amdahl\'s law). Coherence: the more nodes must coordinate, the more time goes into coordination itself (the Universal Scalability Law), and throughput can even fall as nodes are added.'],
+  ul:['Remove shared locks and single-writer hot spots.','Prefer designs where nodes do not need to talk to each other for a request (share-nothing).','Partition by a key so each request touches one node.']},
+ {h:'The usual ladder of techniques',ul:['Cache hot reads (browser, CDN, application cache).','Move slow or bursty work behind a queue and process it asynchronously.','Add read replicas for read-heavy databases.','Denormalise or precompute results so reads are cheap.','Partition or shard the data when one primary cannot take the writes.','Add rate limiting, backpressure and load shedding so overload degrades gracefully instead of collapsing.']},
+ {h:'Autoscaling: what goes wrong',ul:['Lag: new capacity takes minutes, so a sudden spike hits before it arrives. Use scheduled or predictive scaling and keep headroom.','Wrong signal: CPU may stay low while a queue grows. Scale on queue depth, in-flight requests or latency.','Downstream overload: more app servers can crush a database. Cap scale-out to what the dependency can take.','Flapping: scaling in and out repeatedly. Use cool-downs and different thresholds for up and down.']},
+ {h:'Common mistakes',ul:['Sharding early because it sounds scalable. It is expensive to undo, so exhaust caching, replicas and indexing first.','Scaling the app tier while the database is the bottleneck.','Ignoring hot keys: one celebrity user or one popular product can overload one shard however many you add.','Keeping state on a server and then being unable to add servers.']}
+],[
+ {q:'Traffic is 2k requests per second today and will be 10x in six months. How do you work out what breaks first and plan the scaling?',cover:['Load test in stages and watch per-resource saturation (CPU, memory, I/O, connection pools, queues) and p99 latency.','Identify the first bottleneck, usually the database or a shared dependency rather than the stateless tier.','Plan in order of cost and risk: caching, queues, read replicas, then partitioning.','Capacity plan with headroom (N+1 or N+2) and test the failure case too.','Mention cost and the decision to delay complexity until the numbers demand it.'],pitfalls:['Jumping straight to microservices or sharding.','Talking only about averages.','Forgetting downstream limits (third-party rate limits, DB connection caps).']},
+ {q:'A stateless service scales fine to 40 instances but throughput stops growing, and gets worse at 100. What are the likely causes and how do you diagnose?',cover:['Shared bottleneck: database connection pool, a single Redis, a lock, a downstream rate limit.','Coordination or contention costs (Amdahl and the Universal Scalability Law).','Hot keys or uneven load balancing so some instances are saturated while others idle.','Connection storms: 100 instances times pool size exceeds database max connections.','Diagnose with the USE method (utilisation, saturation, errors) per resource and tracing to find where time is spent.'],pitfalls:['Assuming more instances always help.','Looking only at CPU on the app servers.']},
+ {q:'Design autoscaling for a flash sale where new capacity takes three minutes to become ready.',lvl:'Staff+',cover:['Do not rely on reactive scaling alone: schedule or pre-warm capacity before the event and keep a warm pool.','Buffer with queues and absorb spikes at the edge (CDN, waiting room, rate limiting).','Scale on leading signals (queue depth, request rate) rather than CPU.','Protect dependencies: cap concurrency, use circuit breakers, and shed or degrade non-essential features.','Rehearse with load tests and define what degrades first, and who decides.'],pitfalls:['Trusting CPU-based autoscaling to react in time.','No plan for what to turn off under overload.']}
+]);
+
+enrich('Availability',[
+ {h:'What is being measured',p:['Availability is the fraction of time (or of requests) the service works for users. Measure it from the user\'s point of view, for example the share of requests that succeed within a latency threshold, not whether a server process is running.','The standard vocabulary: an SLI is the measured indicator, an SLO is the internal target for it, an SLA is the contractual promise (usually looser than the SLO) with consequences if missed. The error budget is the allowed unreliability: a 99.9% SLO leaves 0.1%, about 43 minutes in a 30-day month.']},
+ {h:'The math you should be able to do in your head',ul:['Allowed downtime per year: 99% about 3.65 days, 99.9% about 8.8 hours, 99.99% about 52 minutes, 99.999% about 5 minutes.','Components in series (all required) multiply: 0.999 x 0.999 x 0.999 is about 99.7%.','Components in parallel (any one will do) fail only if all fail: 1 - (1 - a)^n. Two 99% copies give 99.99%.','Availability = MTBF / (MTBF + MTTR). Cutting recovery time is often cheaper than making failures rarer.']},
+ {h:'The independence trap',p:['The parallel formula assumes failures are independent. They often are not. Two servers in the same rack, on the same deploy, running the same buggy build, or depending on the same database fail together. Real redundancy needs separate failure domains (hosts, racks, availability zones, regions) and staggered changes.']},
+ {h:'Techniques that raise availability',ul:['Redundancy with automatic health checks and failover.','Timeouts, retries with backoff and jitter, circuit breakers, and bulkheads so one failing dependency does not drag everything down.','Graceful degradation: serve cached or partial results when a dependency is down.','Load shedding: reject low-priority work early to keep critical work healthy.','Progressive delivery: canary releases, feature flags and fast rollback. Most outages follow a change.']},
+ {h:'Pick the number deliberately',p:['Each extra nine costs roughly ten times the effort and money, and users cannot tell the difference between 99.99% and 99.999% if their own phone or ISP is less reliable. Choose the target from the business cost of downtime, and check that every hard dependency can support it. You cannot promise more nines than your dependencies in series allow.']}
+],[
+ {q:'Your SLA is 99.95%. The design needs a database (99.9%), a message queue (99.9%) and a third-party API (99.9%) on every request. Is it achievable?',cover:['Compute: 0.999^3 is about 99.7%, below 99.95%, even before your own code.','Remove hard dependencies from the request path: make the third-party call asynchronous or optional, add a fallback or cache.','Add redundancy for the database and queue across availability zones, and note correlated failures.','Translate 99.95% into about 22 minutes of downtime in 30 days to show how tight it is.','Propose per-dependency SLOs and ask whether the SLA really needs to be this high.'],pitfalls:['Multiplying correctly but proposing nothing.','Assuming replicas are independent when they share a zone or deploy.']},
+ {q:'Explain error budgets and how you would use them to decide between feature work and reliability work.',cover:['SLO of 99.9% gives about 43 minutes of budget in a 30-day window.','Burn-rate alerts: alert when the budget is being consumed too fast, not on every blip.','Policy: when the budget is spent, slow releases and prioritise reliability; when plenty remains, ship faster.','Shared ownership between product and engineering makes the trade-off explicit.'],pitfalls:['Treating SLOs as a reporting number with no consequences.','Setting the SLO at 100%.']},
+ {q:'Most of your outages follow deployments or config changes. What do you change?',lvl:'Staff+',cover:['Progressive delivery: canary to a small slice, automated comparison of error and latency, automatic rollback.','Feature flags to decouple deploy from release, and small frequent changes instead of large batches.','Config changes get the same review, staging and rollout as code.','Limit blast radius with cells or regions deployed one after another.','Track change failure rate and time to recover, and run blameless postmortems with action items.'],pitfalls:['Adding approval gates that slow everything without reducing risk.','No automated rollback path.']}
+]);
+
+enrich('Reliability',[
+ {h:'Faults, errors and failures',p:['A fault is a component misbehaving (a disk dies, a process crashes, a bug triggers). A failure is when the system as a whole stops giving users correct service. Reliability work is about making sure faults do not become failures.','Three families of faults: hardware (random, mostly independent), software bugs (systematic and often correlated, the same bug hits every replica at once), and humans (the largest source of outages: bad config, bad deploy, wrong command).']},
+ {h:'Reliable, available, durable: three different promises',ul:['Available: it answers requests.','Reliable: the answers are correct and it keeps behaving correctly over time.','Durable: data you stored is not lost.','A system can be up but wrong (available, not reliable), or down with data intact (durable, not available).']},
+ {h:'Retries done right',p:['Retries fix transient faults but can cause outages. If each of three layers makes up to four attempts, a single user request can become 64 attempts at the bottom layer, right when that layer is struggling.'],
+  ul:['Retry in one layer only, usually near the edge.','Use exponential backoff with random jitter so clients do not retry in lockstep.','Use a retry budget (for example no more than 10% extra requests) and propagate deadlines so work is not done for callers that already gave up.','Only retry operations that are safe to repeat, or make them safe with idempotency keys.','Combine with circuit breakers so a failing dependency is left alone to recover.']},
+ {h:'Protecting data',ul:['Replicate for availability, back up for corruption and human error. Replication copies mistakes instantly, backups let you go back in time.','A backup you have never restored is a hope, not a backup. Test restores on a schedule.','Use checksums to detect silent corruption, and validate input at boundaries.','Know your delivery guarantee: at-most-once, at-least-once (duplicates possible) or effectively-once (at-least-once plus deduplication).']},
+ {h:'Proving it works',p:['Failures you have not rehearsed will surprise you. Use failure injection and chaos experiments in staging and carefully in production, run game days, and make observability (metrics, logs, traces, alerts tied to user impact) part of the design.']}
+],[
+ {q:'Each of three service layers retries failed calls three times. A database at the bottom briefly slows down. What happens and how do you prevent it?',cover:['Amplification: four attempts per layer compounds to 64 attempts at the bottom, turning a blip into an outage (a retry storm).','Retry at one layer, use exponential backoff with jitter, and set a retry budget.','Propagate deadlines so abandoned requests are dropped.','Circuit breakers and load shedding at the dependency.','Idempotency keys so retried writes are safe.'],pitfalls:['Saying "add more capacity" without addressing the feedback loop.']},
+ {q:'A payment request times out and the client retries. How do you make sure the customer is not charged twice?',cover:['Client sends a unique idempotency key with the request.','Server stores the key and the result atomically with the charge (unique constraint) and returns the stored result on a repeat.','Treat the timeout as unknown, not failed: look up the status before retrying or reconcile later.','Model the payment as a state machine and reconcile with the payment provider.'],pitfalls:['Deduplicating only in memory or only on the client.','Retrying a non-idempotent call blindly.']},
+ {q:'Give an example where a system is available but not reliable, and one where it is durable but not available.',cover:['Available but not reliable: stale or wrong results returned fast, for example a cache serving outdated prices after the source changed.','Durable but not available: a database whose data is safe on disk but whose primary is down and not yet failed over.','Show you can separate the three properties and design for each on purpose.']}
+]);
+
+enrich('SPOF',[
+ {h:'How to find single points of failure',p:['Walk a real request from the user to the data and back and ask of each hop: if this dies, what happens? Then widen the lens to everything the request depends on indirectly.'],
+  ul:['Obvious: one load balancer, one database primary, one cache node, one queue broker.','Network and edge: one DNS provider, one internet link, one CDN, an expiring TLS certificate.','Control plane: the service registry, configuration system, secrets store, or the deployment pipeline. If you cannot deploy during an incident, that is a SPOF.','Location: one rack, one availability zone, one region, one cloud account.','People: one engineer who knows how it works (bus factor of one).']},
+ {h:'Hidden and shared SPOFs',p:['Redundancy is fake if both copies share something. Two app servers using one database, two databases in one availability zone, two services behind one authentication service, two regions that both read from the same global config store: each has a SPOF hiding behind the duplication.']},
+ {h:'How to remove them',ul:['Run at least two of everything on the request path and spread them across failure domains.','Make traffic able to move: health checks, automatic failover, shared virtual addresses or managed load balancers.','Keep app servers stateless and keep state in a replicated store.','Keep capacity for N+1: if one node dies, the rest must carry the load.','Remove manual steps from failover where you can, because humans are slow and sleepy at 3 a.m.']},
+ {h:'Not every SPOF is worth removing',p:['Compare the cost of the outage (revenue, trust, safety) with the cost and complexity of redundancy. An internal reporting tool can sit on one machine if you can restore it in an hour. What matters is that the risk is known, written down, and mitigated with a fast recovery plan.']},
+ {h:'Test the failover itself',p:['An untested failover path is a single point of failure on its own. Kill instances on purpose, fail over the database in staging and periodically in production, and run game days. Many teams find that the backup node had never been able to carry the load.']}
+],[
+ {q:'Here is an architecture: CDN, two load balancers, twenty app servers, a primary and a replica database, one Redis, an object store, all in one availability zone. List the single points of failure.',cover:['The availability zone itself: everything fails together.','Redis is a single node: caching and sessions go with it, and a cold cache can then overload the database.','Database failover: is promotion automatic, tested, and what is the data loss from replication lag?','DNS provider, TLS certificates, secrets and configuration store, the deployment pipeline.','Third-party dependencies on the request path, and people (runbooks, on-call).'],pitfalls:['Only naming components with one copy and ignoring shared domains.','Not discussing the cost of removing each.']},
+ {q:'You added a read replica for your primary database. Why might you still have a single point of failure?',cover:['Failover may be manual, slow, or never tested.','Asynchronous replication means promotion can lose recent writes.','Applications may not reconnect to the new primary (connection strings, pools, DNS caches).','Risk of split brain if the old primary is not fenced.','All writes still go to one node, and the replica may be in the same failure domain.']},
+ {q:'When is it right not to remove a single point of failure?',lvl:'Staff+',cover:['When the business impact of an outage is low compared with the cost and operational complexity of redundancy.','Condition: the risk is documented, monitored, and restore time is practised and short.','Redundancy adds failure modes of its own (split brain, config drift), so more is not always safer.','Revisit the decision as the business grows.']}
+]);
+
+enrich('Latency vs Throughput vs Bandwidth',[
+ {h:'Where latency comes from',p:['A request pays four costs: propagation (distance; light in fibre covers about 200 km per millisecond, so 1,000 km is about 5 ms one way), transmission (size divided by bandwidth), queuing (waiting behind other work), and processing (your code and the database).'],
+  ul:['Rough orders of magnitude to remember: memory access about 100 ns, SSD read about 100 microseconds, a round trip inside one data centre about 0.5 ms, across a continent tens of milliseconds, across oceans 100 to 200 ms.','The point is the ratios: memory is thousands of times faster than a network hop, and a network hop is thousands of times faster than a cross-ocean one.']},
+ {h:'Averages lie, percentiles do not',p:['Report p50, p95, p99 (and p99.9 for big systems). The slowest 1% of requests is often your most valuable users, the ones doing the most work.','Tail latency amplifies with fan-out. If a request calls 100 backends in parallel and each is slow 1% of the time, the chance that at least one is slow is 1 - 0.99^100, about 63%. So the user-facing p50 is dominated by the backends\' p99.']},
+ {h:'Little\'s Law and queueing',p:['Little\'s Law: concurrency = throughput x latency. At 1,000 requests per second and 200 ms average latency you have about 200 requests in flight. Use it to size thread pools, connection pools and queues.','As utilisation approaches 100%, queues grow and latency rises sharply (the hockey stick). Latency-sensitive services are usually run at 60 to 70% utilisation to keep room for bursts.']},
+ {h:'Bandwidth-delay product',p:['The amount of data "in the pipe" is bandwidth x round-trip time. A 100 Mbps link with 100 ms RTT holds about 1.25 MB in flight. A transport must keep that much unacknowledged data outstanding to fill the pipe, which is why a single connection can underuse a fast long-distance link and why window sizes and parallel streams matter.']},
+ {h:'How to reduce latency and raise throughput',ul:['Cut round trips: batch calls, reuse connections (keep-alive, pooling), use HTTP/2 or HTTP/3, avoid N+1 queries.','Move data closer: CDN, regional replicas, edge caching.','Do independent work in parallel and use async I/O.','Cache results and precompute expensive work.','Compress payloads when bandwidth is the limit, not when CPU or latency is.','Use hedged or backup requests to cut tail latency, carefully, since they add load.']}
+],[
+ {q:'Median latency is 40 ms but customers complain the product feels slow. How do you investigate?',cover:['Look at p95, p99 and p99.9 per endpoint and per customer segment, not the average.','Use distributed tracing to see which hop dominates the slow requests.','Check queuing and saturation, garbage collection pauses, cold caches, noisy neighbours, lock contention, and retries.','Consider fan-out tail amplification.','If load testing, avoid coordinated omission, which hides tail latency.'],pitfalls:['Optimising the median.','Relying on averaged dashboards.']},
+ {q:'A request fans out to 20 backends in parallel, each with p99 of 200 ms. What is the user-facing tail and what can you do?',cover:['Probability at least one backend is slow is 1 - 0.99^20, about 18%, so roughly one in five requests experiences a 200 ms-plus backend.','Reduce fan-out or cache results.','Set per-call timeouts and return partial results.','Hedged requests: send a second request after the p95 delay and take the first reply.','Fix the slow tail at its source (GC, compaction, noisy neighbour).'],pitfalls:['Treating backend p99 as irrelevant to user p50.']},
+ {q:'Use Little\'s Law to size a connection pool for a service handling 5,000 requests per second with 80 ms average calls to a database.',cover:['Concurrency = 5,000 x 0.08 = 400 requests in flight on average.','Add headroom for tail latency and bursts, but check the database can accept that many connections across all instances.','Per-instance pool size = total concurrency divided by instance count, with queue limits and timeouts.','If the database cannot take it, add caching, batching, or a connection proxy rather than larger pools.']}
+]);
+
+enrich('Consistent Hashing',[
+ {h:'The problem it solves',p:['Splitting keys across N servers with hash(key) mod N works until N changes. Then almost every key maps to a different server. When going from N to N+1 servers, about N/(N+1) of keys move (80% for 4 to 5). For a cache, that is a sudden wave of misses that hits the database. For a database, it is a huge data migration.']},
+ {h:'How the ring works',p:['Hash both servers and keys onto the same circular space (for example 0 to 2^32 - 1). A key is stored on the first server found going clockwise from the key\'s position. Keep the server positions in a sorted array and find the owner with a binary search, O(log V) for V ring points.','Adding a server takes over only the keys between it and its predecessor. Removing a server hands its keys to the next server clockwise. On average only about 1/(N+1) of keys move.']},
+ {h:'Virtual nodes',p:['With one point per server, placement is random, so some servers get much more of the ring and a removed server dumps all its keys on one neighbour, which may then overload and fail too (a cascade). Virtual nodes give each server many points on the ring.'],
+  ul:['Load evens out as the number of points grows (commonly tens to hundreds per server).','A failed server\'s keys spread across many survivors.','Give bigger machines more virtual nodes to match their capacity.','Cost: more metadata to store and distribute, and slower membership changes.']},
+ {h:'Replication on the ring',p:['Dynamo-style stores keep each key on the next N distinct physical servers clockwise (the preference list). Reads and writes then use quorums. When a replica is down, a neighbour can hold writes temporarily (hinted handoff) and pass them back later.']},
+ {h:'Alternatives and limits',ul:['Rendezvous (highest random weight) hashing: each key picks the server with the highest hash(key, server). Simple, balanced, no ring, O(N) per lookup, fine for small N.','Jump consistent hash: needs no memory, very fast, but servers can only be added or removed at the end of the numbered list.','Bounded-load consistent hashing: caps any server\'s load at a multiple of the average to prevent hot spots.','Range partitioning: keeps keys ordered for range scans but needs split and merge logic and can create hot ranges.','Hot keys are a different problem. Hashing spreads keys, not requests to one key. Use replication or local caching for hot keys.']},
+ {h:'Where you will see it',p:['Distributed caches and client libraries (memcached-style), Dynamo-style databases, Cassandra, content delivery networks, and load balancers that need sticky routing by key.']}
+],[
+ {q:'Design a distributed cache cluster that can add and remove nodes without causing a wave of cache misses. How is data placed and how do clients find it?',cover:['Consistent hashing with virtual nodes, so only about 1/N of keys move on a change.','Client-side routing (library knows ring) or a proxy tier; membership via a config store or gossip.','Throttle rebalancing and warm new nodes rather than cutting over at once.','Replicate or accept misses for failed nodes, and protect the database from stampedes (request coalescing, locks, TTL jitter).','Handle hot keys separately with replication or a small local cache.'],pitfalls:['Using mod N and ignoring the miss storm.','Ignoring how all clients agree on the same ring.']},
+ {q:'On a ring without virtual nodes, one server dies and its neighbour falls over soon after. Why, and how do you stop it?',cover:['The neighbour inherits the whole range of the dead node, doubling its load.','Virtual nodes spread the failed node\'s keys across many servers.','Capacity headroom (N+1), bounded-load hashing, and replication so a failure does not shift all traffic to one place.','Slow ramp-up and load shedding to avoid a second failure.']},
+ {q:'Compare consistent hashing, rendezvous hashing and range partitioning. When do you pick each?',lvl:'Staff+',cover:['Consistent hashing: large, changing clusters, point lookups, even spread with vnodes.','Rendezvous: small clusters, minimal state, easy to reason about, O(N) lookups.','Range partitioning: range scans and ordered access, at the cost of hot ranges and split and merge management with a metadata service.','Choose by access pattern: point lookups versus range queries, cluster size, and operational complexity.','Mention bounded-load variants and what to do about hot keys.']}
+]);
+
+enrich('CAP Theorem',[
+ {h:'The precise statement',p:['The formal result (Gilbert and Lynch) uses narrow definitions. Consistency means linearizability: every read returns the latest completed write, as if there were one copy. Note this is not the same as the C in ACID. Availability means every request to a non-failed node gets a response. Partition tolerance means the system keeps working when messages between nodes are lost or delayed.','Since real networks do partition, "partition tolerance" is not optional for a distributed system. The practical statement: during a partition you must choose between consistency and availability. Labelling a database "CA" is a common misconception, because a single node has no partitions to tolerate, and a replicated one over a network does.']},
+ {h:'CP and AP in practice',ul:['CP systems use majority quorums (Raft, Paxos). The side of a partition that has a majority keeps going; the minority refuses requests. Examples of the style: etcd, ZooKeeper, Spanner.','AP systems keep accepting reads and writes on both sides and reconcile later. Examples of the style: Dynamo-style stores, Cassandra with low consistency levels.','Many systems are tunable per request, for example by choosing how many replicas must acknowledge a write or read.']},
+ {h:'PACELC: the part CAP leaves out',p:['PACELC says: if there is a Partition, choose Availability or Consistency; Else (normal operation), choose Latency or Consistency. Even with a healthy network, stronger consistency costs coordination time. Spanner pays latency for consistency (PC/EC). Dynamo-style stores default to low latency and eventual consistency (PA/EL).']},
+ {h:'A spectrum, not a switch',p:['Between linearizable and eventual consistency sit useful middle points: sequential, causal, read-your-writes and monotonic reads. Pick the weakest guarantee that keeps the product correct, per operation rather than per system.']},
+ {h:'Making AP systems safe',ul:['Conflict resolution when replicas diverge: last-write-wins (simple, can silently lose writes), vector clocks (detect conflicts, ask the app to merge), CRDTs (data types that merge automatically, like counters and sets), or application-specific merge rules.','Repair: read repair, anti-entropy background sync, hinted handoff.','Quorums: with N replicas, W write acks and R read acks, R + W > N guarantees a read overlaps the latest write.','Design the product so being briefly wrong is acceptable, or compensate afterwards (for example, refund an oversold item).']}
+],[
+ {q:'For a shopping cart, inventory decrement, and payments ledger, choose CP or AP for each and say what you do during a partition.',cover:['Cart: AP. Never lose an add; merge carts on conflict (union). A briefly stale cart is fine.','Inventory: depends on tolerance. For scarce items use CP or reserve through a single owner; for plentiful stock allow oversell and compensate.','Ledger: CP. Correctness beats availability; the minority side rejects writes.','Explain the user experience during the partition and how divergence is repaired afterwards.','Show you tie the choice to business cost of being wrong, not to a database brand.'],pitfalls:['Declaring the whole system "CP" or "AP".','Not describing behaviour during and after the partition.']},
+ {q:'A teammate says "we picked CA because we use a relational database". What is wrong with that?',cover:['A single-node database has no network partition, so CAP does not apply in the interesting way.','Once data is replicated across machines or zones, partitions can occur and you must choose behaviour during them.','Partition tolerance is not a feature you can opt out of on a real network.','Clarify what failover, replication mode (sync or async) and read-from-replica do to consistency.']},
+ {q:'Explain PACELC and give an example where latency is traded for consistency even with no partition.',lvl:'Staff+',cover:['Define PACELC: if partition then A or C, else L or C.','Example: synchronous cross-region replication or a quorum read adds round trips to guarantee fresh data; Spanner waits out clock uncertainty at commit.','Contrast with reading from the nearest replica for speed and accepting staleness.','Relate to per-request consistency levels and to the product requirement.']}
+]);
+
+enrich('Failover',[
+ {h:'The shapes of failover',ul:['Cold standby: a spare that must be started and restored. Cheap, slow (minutes to hours).','Warm standby: running but not serving, replicating data. Faster, moderate cost.','Hot standby or active-active: serving traffic already, so recovery is mainly rerouting. Fastest and most expensive, since every node needs spare headroom.','Automatic versus manual: automatic is faster but can make a wrong decision on a false alarm; manual is safer but slow.']},
+ {h:'The four steps',p:['Detect, decide, act, recover.'],ul:['Detect: health checks and heartbeats. A shorter timeout is faster but risks declaring a slow node dead.','Decide: who is the new leader? Use a consensus or lease mechanism, ideally with several observers agreeing, to avoid two nodes both claiming leadership (split brain).','Act: promote the standby and redirect traffic (virtual IP, proxy, load balancer, or DNS). DNS is slow because clients and resolvers cache answers.','Recover: bring the old primary back as a follower, resync, and decide whether to fail back.']},
+ {h:'RTO, RPO and data loss',p:['Recovery time objective (RTO) is how long you can be down. Recovery point objective (RPO) is how much data you can lose. With asynchronous replication, the standby is a little behind, so failover loses the most recent writes (RPO above zero). With synchronous replication RPO is zero, but every write waits for the standby and the primary may stall if the standby is down. Semi-synchronous replication is a common middle path.']},
+ {h:'Split brain and fencing',p:['If the old primary is only partitioned, not dead, and still accepts writes while the new one does too, data diverges. Prevent it with quorum-based leader election and fencing: cut off the old primary (STONITH, revoke its storage access or lease) and use fencing tokens so stale leaders are rejected.']},
+ {h:'Pitfalls',ul:['Flapping: repeated failovers in a row. Add hysteresis and cool-downs.','Cold standby caches: the new primary starts with empty caches and gets overloaded.','Capacity: the survivor cannot carry the full load.','Clients that cache connections or DNS and keep talking to the dead node.','Failover that has never been tested. Run drills.']}
+],[
+ {q:'Your primary Postgres dies. The async replica was about 3 seconds behind. Walk through the failover and what you tell the business about data loss.',cover:['Detect and confirm the failure, then fence the old primary so it cannot accept writes.','Promote the replica, repoint clients through a proxy or virtual address, warm caches and connection pools.','Up to about 3 seconds of acknowledged writes may be lost (the RPO); try to recover them from the old primary\'s log or replay from upstream queues; reconcile.','Offer semi-synchronous replication for critical data, and state the latency cost.','Plan rejoin of the old primary as a follower and a post-incident review.'],pitfalls:['Promoting without fencing.','Claiming zero data loss with async replication.']},
+ {q:'How do you prevent split brain during automated failover?',cover:['Leader election through a quorum (consensus store such as etcd or ZooKeeper), with a majority needed to promote.','Leases with expiry, and the old leader stops serving when it cannot renew.','Fencing tokens or STONITH so stale leaders are rejected downstream.','Multiple independent observers agreeing before failing over.','Prefer an odd number of voters across failure domains.']},
+ {q:'Design failover between two regions for a user-facing API. What are the hard parts?',lvl:'Staff+',cover:['Data: replication lag and RPO, single-writer versus multi-writer, conflict handling.','Traffic: global load balancing, health checks, DNS TTLs or anycast, session handling.','Capacity: is the second region warm and sized for full load, and how long to scale it?','Dependencies: shared services, third parties, and configuration that are not actually multi-region.','Failback, regular drills, and cost, with a clear RTO and RPO agreed with the business.'],pitfalls:['Assuming DNS failover is instant.','Forgetting hidden shared dependencies.']}
+]);
+
+enrich('Fault Tolerance',[
+ {h:'Fault versus failure',p:['A fault is a component deviating from spec; a failure is the system no longer delivering its service. Fault tolerance prevents the first from becoming the second. Failure models matter: crash-stop (node halts), crash-recovery (node restarts, maybe with stale state), omission (messages lost), timing (too slow), and Byzantine (arbitrary or malicious behaviour).']},
+ {h:'How many replicas do you need',ul:['Crash faults with a majority rule: N = 2f + 1 tolerates f failures (3 nodes tolerate 1, 5 nodes tolerate 2).','Byzantine faults: N = 3f + 1 (4 nodes tolerate 1 lying node). Rarely needed inside a trusted data centre, common in blockchains.','Quorum reads and writes: with N replicas, write to W and read from R. If R + W > N a read always overlaps the latest write. N=3, W=2, R=2 is a common choice.']},
+ {h:'Replication versus erasure coding',p:['Three full copies tolerate two losses but cost 3x the storage. Erasure coding splits data into k data pieces plus m parity pieces. A 10+4 scheme survives any 4 lost pieces at 1.4x storage. The costs are CPU, slower reads when pieces are missing, and heavy network traffic when rebuilding. Hot data usually stays replicated; cold data is erasure coded.']},
+ {h:'Failure domains',p:['Copies only help if they fail independently. Spread them across hosts, racks, availability zones and regions, and make placement zone-aware. A 5-node consensus cluster with 3 nodes in one zone dies with that zone; placing 2, 2 and 1 across three zones survives the loss of any one.']},
+ {h:'Containing faults',ul:['Timeouts everywhere, so a stuck dependency cannot hold resources forever.','Bulkheads: separate pools for separate dependencies.','Circuit breakers: stop calling something that is failing.','Graceful degradation: reduced service beats no service.','Checksums to catch silent data corruption, and regular scrubbing of stored data.']},
+ {h:'Fault tolerance versus high availability',p:['High availability aims for very little downtime, often accepting a short blip while failover happens. Fault tolerance aims for no visible interruption at all, usually by running work redundantly in lockstep or by quorum. It costs more, so use it where interruption is truly unacceptable.']}
+],[
+ {q:'You must store 1 PB durably and survive two simultaneous disk or node losses. Compare 3x replication with erasure coding.',cover:['3x replication: tolerates two losses, 3 PB raw, simple, fast reads and fast repair.','Erasure coding such as 10+4: tolerates four losses, about 1.4 PB raw.','Costs of EC: CPU, read amplification and latency during degraded reads, repair bandwidth, inefficiency for small objects.','Hybrid: replicate hot or small data, erasure-code cold data.','Mention failure domain placement for the pieces.'],pitfalls:['Comparing only storage cost.','Ignoring rebuild time, during which you are exposed to further failures.']},
+ {q:'A 5-node consensus cluster has 3 nodes in zone A and 2 in zone B. What happens if zone A is lost, and how would you place the nodes?',cover:['Losing zone A takes 3 of 5, so no majority remains and the cluster stops.','Place across three zones as 2, 2, 1 so losing any single zone keeps 3 or 4 nodes.','Trade-off: cross-zone latency on every write, and the cost of a third zone.','For a two-zone budget, consider where the tie is broken (a lightweight witness node in a third location).']},
+ {q:'What failure model does Raft assume, and what changes if nodes can behave maliciously or return corrupt data?',lvl:'Staff+',cover:['Raft assumes crash-recovery nodes and an unreliable network (message loss, delay, reordering), not Byzantine behaviour, and needs partial synchrony for liveness.','Byzantine tolerance needs 3f + 1 nodes and protocols like PBFT, with higher cost and complexity.','Inside a trusted data centre, usually handle corruption with checksums, scrubbing and replication rather than full BFT.','Where participants are not trusted (public blockchains, multi-party systems), BFT is justified.']}
+]);
+
+/* phase-wide questions */
+PHASES[0].iq=[
+ {q:'You are asked to design for 99.99% availability. What is your checklist, and how do you decide whether the target is realistic?',cover:['Translate the target into about 52 minutes a year (4.3 minutes a month) and define the SLI from the user view.','Map the request path and dependencies; multiply series availability; remove or decouple hard dependencies.','Remove SPOFs across failure domains, with N+1 capacity and automated, tested failover.','Progressive delivery and fast rollback, since changes cause most outages; on-call and runbooks to reduce recovery time.','Compare cost with business value, and agree an error budget policy.'],pitfalls:['Quoting nines without a dependency analysis.','Ignoring operational causes (deploys, config, humans).']},
+ {q:'Explain how consistent hashing, replication and quorums combine in a Dynamo-style key-value store, and what happens during a partition.',cover:['The ring assigns each key to a preference list of N replicas on distinct physical nodes.','Writes go to W replicas, reads to R; R + W > N gives overlap; sloppy quorums with hinted handoff trade consistency for availability.','During a partition both sides can accept writes (AP); versions diverge and are reconciled with vector clocks, last-write-wins or CRDTs; read repair and anti-entropy converge replicas.','Mention virtual nodes, membership via gossip, and tunable consistency per request.']},
+ {q:'You inherit a system with frequent outages. How do you spend the first 30 days?',lvl:'Staff+',cover:['Establish what is measured: user-centred SLIs and a baseline of incidents by cause.','Map dependencies and single points of failure; list the top recurring failure modes from postmortems.','Quick wins: alerts tied to user impact, runbooks, safe rollback, canary deploys, capacity headroom.','Set an SLO and error-budget policy with product leadership so reliability gets protected time.','Plan structural fixes in order of risk reduction per effort, and rehearse failover and restore.'],pitfalls:['Starting a rewrite.','Fixing symptoms without measuring causes.']},
+ {q:'A product manager wants "five nines". How do you respond?',lvl:'Staff+',cover:['Ask what a minute of downtime costs and what users actually experience; compare with the end-user\'s own connectivity.','Show the dependency math: each hard dependency in series lowers the ceiling.','Explain the cost curve: about an order of magnitude more effort per nine, usually requiring multi-region active-active and mature operations.','Offer tiers: stricter targets for critical user journeys, looser for the rest, with graceful degradation.','Agree an SLO, an error budget and what is traded away to get it.']}
+];
+
+window.addEventListener('hashchange',route);route();
+</script></body></html>
