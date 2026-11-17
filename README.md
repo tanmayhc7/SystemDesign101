@@ -2,6 +2,8 @@
 
 An interactive course page, built as a single self-contained `index.html`, covering every topic in [awesome-system-design-resources](https://github.com/ashishps1/awesome-system-design-resources) (not affiliated).
 
+**Live site: https://tanmayhc7.github.io/SystemDesign101/**
+
 Status: Phase 0 (Core Concepts, 9 lessons) is built. Phases 1 to 12 and the Library are listed on the home page as planned.
 
 ## Files
