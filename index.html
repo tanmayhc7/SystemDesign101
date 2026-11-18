@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>System Design From Scratch</title>
+<title>sysDesign101</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,800..900&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 :root{color-scheme:light;
@@ -328,13 +328,14 @@ function iqEl(list,title,who){const box=h('div',{class:'iq'});box.append(h('h3',
 
 /* ===== router + views ===== */
 const root=document.getElementById('app');
+const siteName=document.title;
 function lessonHref(l){return '#/l/'+l.id;}
 function totals(){const d=LESSONS.filter(l=>S.done[l.id]).length;return {d,n:LESSONS.length};}
-function header(){const t=totals();return h('div',{class:'top'},h('a',{class:'brand',href:'#/'},sv('svg',{viewBox:'0 0 34 34','aria-hidden':'true'},sv('circle',{cx:17,cy:17,r:13,fill:'none',stroke:'var(--ink)','stroke-width':4.5}),sv('rect',{x:1,y:12,width:32,height:10,rx:2,fill:'var(--accent)'})),'System Design From Scratch'),
+function header(){const t=totals();return h('div',{class:'top'},h('a',{class:'brand',href:'#/'},sv('svg',{viewBox:'0 0 34 34','aria-hidden':'true'},sv('circle',{cx:17,cy:17,r:13,fill:'none',stroke:'var(--ink)','stroke-width':4.5}),sv('rect',{x:1,y:12,width:32,height:10,rx:2,fill:'var(--accent)'})),siteName),
   h('div',{class:'nav'},h('a',{class:'pill',href:'#/prereq'},'Prerequisites'),h('a',{class:'pill',href:'#/library'},'Library'),h('a',{class:'pill',href:'#/about'},'Progress'),
   h('span',{class:'pill xp'},`${S.xp} XP`),h('span',{class:'pill'},`${S.streak} day streak`),h('span',{class:'pill'},`${t.d}/${t.n} lessons`),
   h('button',{class:'pill',type:'button',onclick:()=>{const dark=(document.documentElement.getAttribute('data-theme')||(matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))==='dark';S.theme=dark?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);save();},'aria-label':'Toggle dark mode'},'Theme')));}
-function shell(...kids){clearTimers();root.textContent='';const w=h('div',{class:'wrap'},header(),...kids);root.append(w);window.scrollTo&&window.scrollTo(0,0);document.title='System Design From Scratch';return w;}
+function shell(...kids){clearTimers();root.textContent='';const w=h('div',{class:'wrap'},header(),...kids);root.append(w);window.scrollTo&&window.scrollTo(0,0);document.title=siteName;return w;}
 const gv=(i,k)=>`var(--g${GROUP(i)}${k||''})`;
 
 const ABBR=['Core Concepts','Networking','APIs','Databases','Caching','Async Messaging','Distributed Systems','Architecture Patterns','Tradeoffs','Interview Framework','Problems: Easy','Problems: Medium','Problems: Hard'];
@@ -409,7 +410,7 @@ function viewPhase(i){const p=PHASES[i];if(!p)return viewHome();const d=p.lesson
 function viewLesson(id){const l=BYID[id];if(!l)return viewHome();const p=PHASES[l.phase];const idx=p.lessons.indexOf(l);const prev=p.lessons[idx-1],next=p.lessons[idx+1];
   const demo=h('div',{class:'demo'});
   const w=shell();const panel=h('div',{class:'panel',style:lineVars(l.phase)});w.append(panel);
-  document.title=l.key+' | System Design From Scratch';
+  document.title=l.key+' | '+siteName;
   panel.append(h('div',{class:'crumbs'},h('a',{href:'#/'},'Home'),' / ',h('a',{href:'#/p/'+l.phase},'Line '+l.phase+': '+p.name),' / ',l.short||l.key),h('div',{class:'sign'},h('span',{class:'roundel','aria-hidden':'true'},String(l.phase)),h('h2',{},l.title||l.key)),h('div',{class:'tag'},l.tag||''),
     h('nav',{class:'rail','aria-label':'Stations on this line'},p.lessons.map(x=>h('a',{href:lessonHref(x),class:(x===l?'cur ':'')+(S.done[x.id]?'done':''),title:x.key,'aria-label':x.key+(x===l?' (current)':'')},h('i')))));
   if(l.pre&&l.pre.length){panel.append(h('div',{class:'row'},h('span',{class:'note'},'Prerequisites:'),l.pre.map(k=>{const t=BYKEY[k];return t?h('a',{class:'chip'+(S.done[t.id]?' ok':''),href:lessonHref(t)},(t.short||t.key)):h('span',{class:'chip'},k);})));}

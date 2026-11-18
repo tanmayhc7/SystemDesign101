@@ -1,4 +1,4 @@
-# System Design From Scratch
+# sysDesign101
 
 An interactive course page, built as a single self-contained `index.html`, covering every topic in [awesome-system-design-resources](https://github.com/ashishps1/awesome-system-design-resources) (not affiliated).
 
