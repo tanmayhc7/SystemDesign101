@@ -1,17 +1,42 @@
 # sysDesign101
 
-An interactive course page, built as a single self-contained `index.html`, covering every topic in [awesome-system-design-resources](https://github.com/ashishps1/awesome-system-design-resources) (not affiliated).
+An interactive introduction to system design. Explore how systems scale, stay available, and handle failures through browser-based demos, short explanations, and quizzes.
 
-**Live site: https://tanmayhc7.github.io/SystemDesign101/**
+**[Open the course](https://tanmayhc7.github.io/SystemDesign101/)** · [Start Core Concepts](https://tanmayhc7.github.io/SystemDesign101/#/p/0) · [Check prerequisites](https://tanmayhc7.github.io/SystemDesign101/#/prereq)
 
-Status: Phase 0 (Core Concepts, 9 lessons) is built. Phases 1 to 12 and the Library are listed on the home page as planned.
+## What you can learn today
 
-## Files
-- `index.html` is the whole page (built output). Open it in a browser. Fonts load from Google Fonts, nothing else is fetched except YouTube videos, which load only when you press play.
-- `src/` has the sources: `engine.js` (router, views, quiz, generic demos), `demos0.js` (Phase 0 demos), `data0.js` (phases and lessons), `styles.css`.
-- `repo.json` is the topic list parsed from the source README. `parse_repo.py` makes it, `build.py` assembles `index.html`.
+**Core Concepts** is available now and contains nine lessons. It covers scalability, availability, reliability, single points of failure, latency and throughput, consistent hashing, the CAP theorem, failover, and fault tolerance. It also includes interview questions with answer outlines.
 
-## Adding a lesson
-Register a demo with `DEMOS.myDemo=function(host,opts,ctx){...}`, then `lesson(phaseIndex,{key,short,tag,lead,demo,takeaway,pre,quiz,terms})`. `key` must match the topic title in the source README exactly, because the source link and (for problems) the YouTube video are looked up by it. Use `ctx.every` for timers so they stop when you leave the page.
+The course map shows 12 planned phases, from networking and APIs through distributed systems and interview problems. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) is already available and collects books, courses, engineering articles, and papers.
 
-Numbers inside demos are made up to teach an idea, not benchmarks.
+Your quiz progress is saved in your browser. You can export or import it from the [Progress page](https://tanmayhc7.github.io/SystemDesign101/#/about).
+
+## Run locally
+
+Start a local server with Python 3 from the repository root.
+
+```sh
+python3 -m http.server --bind 127.0.0.1 8000
+```
+
+Open [localhost:8000](http://127.0.0.1:8000/). The repository includes the generated page, so you can preview it immediately. Run the build again after editing the sources.
+
+```sh
+python3 build.py
+```
+
+## Project structure
+
+| Path | Purpose |
+| --- | --- |
+| [`src/`](src/) | Course data, demos, routing, quizzes, and styles |
+| [`build.py`](build.py) | Combines the sources and topic data into the static site |
+| [`index.html`](index.html) | Generated page served by GitHub Pages |
+| [`repo.json`](repo.json) and [`parse_repo.py`](parse_repo.py) | Topic catalog and the script that generates it |
+
+To add a lesson, register its demo in [`src/demos0.js`](src/demos0.js) and use `lesson(phaseIndex, definition)` in the course data. Match the lesson’s `key` to the upstream topic title so the app can find its source link and any linked video. Use `ctx.every` for recurring demo timers so they stop when the learner leaves the page. Rebuild `index.html` after editing the sources.
+
+## Credits and license
+
+sysDesign101 is an independent companion to [Awesome System Design Resources](https://github.com/ashishps1/awesome-system-design-resources). Demo numbers are illustrative. This repository includes the [GNU GPL v3 license](LICENSE).
