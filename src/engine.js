@@ -147,18 +147,33 @@ function mapEl(){
   return h('div',{class:'mapwrap'},svg);}
 function viewHome(q){
   const t=totals();
-  const search=h('input',{class:'search',type:'search',placeholder:'Find a station: CAP, sharding, design Uber...','aria-label':'Search lessons',value:q||''});
+  const search=h('input',{id:'lesson-search',class:'search',type:'search',placeholder:'CAP, sharding, design Uber...','aria-label':'Search lessons',value:q||''});
   const results=h('div',{class:'lessons'});const mapw=mapEl();
   const legend=h('div',{class:'legend'});
   PHASES.forEach(p=>{const d=p.lessons.filter(l=>S.done[l.id]).length,n=p.lessons.length||planned(p).length||1;
     legend.append(h('a',{class:'lg',href:'#/p/'+p.i,style:lineVars(p.i)},h('span',{class:'roundel','aria-hidden':'true'},String(p.i)),h('span',{class:'tx'},h('b',{},p.name),meter(p.lessons.length?100*d/p.lessons.length:0),h('span',{class:'cnt'},p.lessons.length?`${d} of ${p.lessons.length} stations done`:`Planned: ${n} topic${n>1?'s':''}`)))); });
   legend.append(h('a',{class:'lg',href:'#/library',style:'--lc:var(--accent);--lt:var(--on-accent)'},h('span',{class:'roundel','aria-hidden':'true'},'L'),h('span',{class:'tx'},h('b',{},'Library'),h('span',{class:'cnt'},'Courses, books, channels, papers'))));
   const lh=h('h3',{},'All lines');
+  const built=t.d, total=PHASES.length, first=PHASES.find(p=>p.lessons.length);
+  const heroStats=h('div',{class:'hero-stats'},
+    h('div',{class:'hero-stat'},h('b',{},String(built)),h('span',{},'stations live')),
+    h('div',{class:'hero-stat'},h('b',{},String(total)),h('span',{},'lines mapped')),
+    h('div',{class:'hero-stat'},h('b',{},'No'),h('span',{},'account needed'))
+  );
+  const mission=h('aside',{class:'mission-card'},
+    h('div',{class:'mission-top'},h('span',{class:'eyebrow'},'Your route'),h('span',{class:'mission-signal','aria-hidden':'true'})),
+    h('h3',{},first?`Start with ${first.name}`:'Start with the map'),
+    h('p',{},'Short lessons, interactive demos, and interview questions. Your progress stays in this browser.'),
+    h('div',{class:'mission-progress'},h('div',{class:'mission-progress-label'},h('span',{},'Course readiness'),h('b',{},`${built}/${total} live`)),meter(total?100*built/total:0)),
+    h('div',{class:'mission-foot'},h('span',{class:'status-dot','aria-hidden':'true'}),'Local-first · no account required')
+  );
+  const sectionHead=h('div',{class:'section-head'},h('div',{},h('span',{class:'eyebrow'},'The learning route'),lh),h('span',{class:'section-note'},'13 lines · 1 library'));
   function doSearch(){results.textContent='';const v=search.value.trim().toLowerCase();const hide=!!v;mapw.style.display=hide?'none':'';legend.style.display=hide?'none':'';lh.style.display=hide?'none':'';if(!v)return;const hits=LESSONS.filter(l=>(l.key+' '+(l.short||'')+' '+(l.lead||'')).toLowerCase().includes(v)).slice(0,30);if(!hits.length)results.append(h('p',{class:'note'},'No station matches. Try another word.'));hits.forEach(l=>results.append(lrow(l)));}
   search.addEventListener('input',doSearch);
-  shell(h('div',{class:'hero'},h('h1',{},'Ride every system design topic.'),h('div',{class:'sub'},h('p',{},'One line per phase of the awesome-system-design-resources list. Board a station, play with the demo, read the depth, pass the quiz, and the station fills in. Not affiliated with the source repo.'),
-    h('div',{class:'row'},h('a',{class:'btn',href:'#/p/0'},'Board at Core Concepts'),h('a',{class:'btn ghost',href:'#/prereq'},'Check prerequisites'),h('span',{class:'note'},`${t.d} of ${t.n} stations built so far`)),search)),
-    mapw,results,lh,legend);
+  shell(h('section',{class:'hero'},h('div',{class:'hero-copy'},h('span',{class:'eyebrow'},'Interactive field guide · System design 101'),h('h1',{},'Build intuition for the systems behind the internet.'),h('p',{},'Follow a visual route from core concepts to interview problems. Board a station, play with the demo, and learn by making trade-offs.'),
+    h('div',{class:'row hero-actions'},h('a',{class:'btn',href:'#/p/0'},'Start Core Concepts'),h('a',{class:'btn ghost',href:'#/prereq'},'Check prerequisites')),
+    h('div',{class:'search-wrap'},h('label',{for:'lesson-search'},'Jump to a station'),search),heroStats),mission),
+    mapw,results,sectionHead,legend);
   if(q)doSearch();
 }
 function lrow(l){return h('a',{class:'lrow'+(S.done[l.id]?' done':''),href:lessonHref(l),style:lineVars(l.phase)},h('span',{class:'dot','aria-hidden':'true'}),h('span',{class:'tx'},h('b',{},l.key),h('span',{},l.tag||'')),h('span',{class:'badge lv'},ABBR[l.phase]||PHASES[l.phase].name));}
