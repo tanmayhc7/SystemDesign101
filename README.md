@@ -6,9 +6,11 @@ An interactive introduction to system design. Explore how systems scale, stay av
 
 ## What you can learn today
 
-**Core Concepts** is available now and contains nine lessons. It covers scalability, availability, reliability, single points of failure, latency and throughput, consistent hashing, the CAP theorem, failover, and fault tolerance. It also includes interview questions with answer outlines.
+**Core Concepts** (nine lessons) covers scalability, availability, reliability, single points of failure, latency and throughput, consistent hashing, the CAP theorem, failover, and fault tolerance.
 
-The course map shows 12 planned phases, from networking and APIs through distributed systems and interview problems. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) is already available and collects books, courses, engineering articles, and papers.
+**Networking Fundamentals** (eight lessons) covers the OSI model, IP addresses and CIDR, DNS, proxies and reverse proxies, HTTP and HTTPS, TCP and UDP, load balancing, and checksums. Each lesson has an interactive demo, an in-depth section, quiz questions, and senior-level interview questions.
+
+The course map shows 11 more planned phases, from APIs and databases through distributed systems and interview problems. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) is already available and collects books, courses, engineering articles, and papers.
 
 Your quiz progress is saved in your browser. You can export or import it from the [Progress page](https://tanmayhc7.github.io/SystemDesign101/#/about).
 
@@ -35,7 +37,7 @@ python3 build.py
 | [`index.html`](index.html) | Generated page served by GitHub Pages |
 | [`repo.json`](repo.json) and [`parse_repo.py`](parse_repo.py) | Topic catalog and the script that generates it |
 
-To add a lesson, register its demo in [`src/demos0.js`](src/demos0.js) and use `lesson(phaseIndex, definition)` in the course data. Match the lesson’s `key` to the upstream topic title so the app can find its source link and any linked video. Use `ctx.every` for recurring demo timers so they stop when the learner leaves the page. Rebuild `index.html` after editing the sources.
+To add a lesson, register its demo in the matching `src/demosN.js` file and use `lesson(phaseIndex, definition)` in the course data. Match the lesson’s `key` to the upstream topic title so the app can find its source link and any linked video. Use `ctx.every` for recurring demo timers so they stop when the learner leaves the page. Rebuild `index.html` after editing the sources.
 
 ## Credits and license
 
