@@ -10,7 +10,9 @@ An interactive introduction to system design. Explore how systems scale, stay av
 
 **Networking Fundamentals** (eight lessons) covers the OSI model, IP addresses and CIDR, DNS, proxies and reverse proxies, HTTP and HTTPS, TCP and UDP, load balancing, and checksums. Each lesson has an interactive demo, an in-depth section, quiz questions, and senior-level interview questions.
 
-The course map shows 11 more planned phases, from APIs and databases through distributed systems and interview problems. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) is already available and collects books, courses, engineering articles, and papers.
+**API Fundamentals** (eight lessons) covers APIs and HTTP methods, API gateways, REST vs GraphQL, WebSockets, webhooks, idempotency, rate limiting, and API design. The demos let you send a request twice and watch what happens, compare round trips with and without a gateway, count the cost of polling against WebSockets, replay a payment whose reply was lost, and run three rate limiting algorithms on the same traffic.
+
+The course map shows 10 more planned phases, from databases through distributed systems and interview problems. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) is already available and collects books, courses, engineering articles, and papers.
 
 Your quiz progress is saved in your browser. You can export or import it from the [Progress page](https://tanmayhc7.github.io/SystemDesign101/#/about).
 
