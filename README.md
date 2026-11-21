@@ -20,6 +20,8 @@ An interactive introduction to system design. Explore how systems scale, stay av
 
 **Distributed Systems and Microservices** (eight lessons) covers heartbeats, service discovery, consensus, distributed locking, gossip, circuit breakers (with timeouts, retries, bulkheads and fallbacks), disaster recovery, and distributed tracing. The demos let you trade detection speed for false alarms, crash an instance behind a stale client cache, partition a Raft leader away from the majority, watch a paused lock holder corrupt a file without a fencing token, spread a rumour through a cluster, trigger a retry storm, pick a DR strategy from RPO and RTO targets, and read a trace waterfall.
 
+Every built phase ends with a six-question end-of-line quiz, and its interview questions come at three levels: mid, senior, and Staff+.
+
 The course map shows 6 more planned phases, from databases through distributed systems and interview problems. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) is already available and collects books, courses, engineering articles, and papers.
 
 Your quiz progress is saved in your browser. You can export or import it from the [Progress page](https://tanmayhc7.github.io/SystemDesign101/#/about).

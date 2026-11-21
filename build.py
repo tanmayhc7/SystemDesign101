@@ -33,6 +33,7 @@ const REPO={json.dumps(repo,ensure_ascii=False)};
 {r('src/data5b.js')}
 {r('src/data6.js')}
 {r('src/data6b.js')}
+{r('src/phasextra.js')}
 window.addEventListener('hashchange',route);route();
 </script></body></html>'''
 open('index.html','w',encoding='utf-8').write(html)
