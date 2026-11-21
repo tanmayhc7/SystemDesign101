@@ -101,7 +101,7 @@ function videoEl(id){const w=h('div',{style:'position:relative;aspect-ratio:16/9
 function deepEl(d){return h('div',{class:'deep'},d.map(x=>typeof x==='string'?h('p',{},x):h('div',{class:'dsec'},h('h3',{},x.h),(x.p||[]).map(t=>h('p',{},t)),x.ul?h('ul',{},x.ul.map(t=>h('li',{},t))):null)));}
 function iqEl(list,title,who){const box=h('div',{class:'iq'});box.append(h('h3',{},title));
   list.forEach((q,i)=>{const ta=h('textarea',{rows:3,placeholder:'Practise: type or say your answer before reading the points below.','aria-label':'Your practice answer'});
-    box.append(h('details',{class:'iqd'},h('summary',{},h('span',{class:'badge '+(q.lvl==='Staff+'?'warn':'')},q.lvl||'Senior'),' ',q.q,who?h('span',{class:'note'},'  ('+q.from+')'):null),
+    box.append(h('details',{class:'iqd'},h('summary',{},h('span',{class:'badge '+(q.lvl==='Staff+'?'warn':q.lvl==='Mid'?'mid':'')},q.lvl||'Senior'),' ',q.q,who?h('span',{class:'note'},'  ('+q.from+')'):null),
       ta,h('b',{},'A strong answer covers'),h('ul',{},q.cover.map(t=>h('li',{},t))),q.pitfalls?h('b',{},'Common pitfalls'):null,q.pitfalls?h('ul',{},q.pitfalls.map(t=>h('li',{},t))):null));});
   return box;}
 
@@ -183,7 +183,8 @@ function viewPhase(i){const p=PHASES[i];if(!p)return viewHome();const d=p.lesson
     p.pre&&p.pre.length?h('div',{class:'takeaway'},h('b',{},'Before this line: '),p.pre.join(' · ')):null,
     meter(p.lessons.length?100*d/p.lessons.length:0),h('span',{class:'note'},`${d} of ${p.lessons.length} stations complete`),
     p.lessons.length?h('div',{class:'lessons line'},p.lessons.map(lrow)):h('div',{class:'lessons line'},planned(p).map(x=>h('div',{class:'lrow',style:'opacity:.6'},h('span',{class:'dot','aria-hidden':'true'}),h('span',{class:'tx'},h('b',{},x.t),h('span',{},'Planned')),h('span',{class:'badge lv'},'Coming soon')))),
-    p.lessons.length?h('div',{style:'display:flex;flex-direction:column;gap:14px'},h('h3',{},'Interview questions for this phase'),h('p',{class:'note'},'Senior SDE level and above. Senior answers give trade-offs, numbers and failure modes. Staff+ answers add cost, migration and organisational angles. Try each out loud before opening it.'),p.iq?iqEl(p.iq,'Across the whole phase'):null,...p.lessons.filter(l=>l.iq&&l.iq.length).map(l=>iqEl(l.iq.map(q=>Object.assign({},q,{from:l.short||l.key})),l.short||l.key,true))):null,
+    p.lessons.length&&p.quiz?phaseQuizEl(p,i):null,
+    p.lessons.length?h('div',{style:'display:flex;flex-direction:column;gap:14px'},h('h3',{},'Interview questions for this phase'),h('p',{class:'note'},'Three levels. Mid answers explain the idea correctly and apply it to a simple case. Senior answers give trade-offs, numbers and failure modes. Staff+ answers add cost, migration and organisational angles. Try each out loud before opening it.'),p.iq?iqEl(p.iq,'Across the whole phase'):null,...p.lessons.filter(l=>l.iq&&l.iq.length).map(l=>iqEl(l.iq.map(q=>Object.assign({},q,{from:l.short||l.key})),l.short||l.key,true))):null,
     p.lessons.length?null:h('div',{class:'takeaway'},h('b',{},'Not built yet. '),'This line opens when its stations are built.'),
     h('div',{class:'nextprev'},i>0?h('a',{class:'btn ghost',href:'#/p/'+(i-1)},'Previous line'):h('span'),i<PHASES.length-1?h('a',{class:'btn ghost',href:'#/p/'+(i+1)},'Next line'):h('a',{class:'btn ghost',href:'#/library'},'Library'))));}
 function viewLesson(id){const l=BYID[id];if(!l)return viewHome();const p=PHASES[l.phase];const idx=p.lessons.indexOf(l);const prev=p.lessons[idx-1],next=p.lessons[idx+1];
@@ -215,6 +216,14 @@ function quizEl(l){const box=h('div',{class:'quiz'});const banner=h('div');const
   function finish(){if(ok.every(Boolean)&&!S.done[l.id]){S.done[l.id]=true;S.xp+=5;bumpStreak();save();{const c=document.querySelector('.rail a.cur');if(c)c.classList.add('done');}banner.className='done-banner';banner.textContent='Lesson complete. +5 XP';}else if(S.done[l.id]){banner.className='done-banner';banner.textContent='Lesson complete.';}save();}
   if(S.done[l.id]){banner.className='done-banner';banner.textContent='Completed earlier. You can retry the quiz any time.';}
   box.append(banner);return box;}
+function phaseQuizEl(p,i){S.pq=S.pq||{};const box=h('div',{class:'quiz'});const qs=p.quiz;const ok=new Array(qs.length).fill(false);const first=new Array(qs.length).fill(true);const res=h('div');
+  box.append(h('h3',{},'End-of-line quiz'),h('p',{class:'note'},`${qs.length} questions that mix the whole line. Your score counts answers right on the first try.`+(S.pq[i]!=null?` Best so far: ${S.pq[i]} of ${qs.length}.`:'')));
+  qs.forEach((Q,qi)=>{const opts=h('div',{class:'opts'});const why=h('div',{class:'why'});
+    Q.o.forEach((t,oi)=>{const b=h('button',{class:'opt',type:'button',onclick:()=>{if(ok[qi])return;if(oi===Q.a){b.classList.add('right');ok[qi]=true;why.textContent='Right. '+Q.why;done();}else{b.classList.add('wrong');first[qi]=false;why.textContent='Not quite. Try another option.';}}},t);opts.append(b);});
+    box.append(h('div',{class:'q'},h('b',{},`${qi+1}. ${Q.q}`),opts,why));});
+  function done(){if(!ok.every(Boolean))return;const sc=first.filter(Boolean).length;const best=Math.max(sc,S.pq[i]||0);if((S.pq[i]==null)||sc>S.pq[i]){if(S.pq[i]==null)S.xp+=sc*5;S.pq[i]=best;save();}
+    res.className='done-banner';res.textContent=`Score: ${sc} of ${qs.length} on the first try.`+(sc===qs.length?' The whole line is solid.':' Revisit the lessons behind the ones you missed.');}
+  box.append(res);return box;}
 function viewPrereq(){
   const items=[['Basic programming','Variables, loops, functions, and reading short code samples. The demos are in the browser, so you never need to write code to follow along.'],['How the web works','A browser asks a server for a page and gets a response back. Phase 1 builds on this.'],['Basic data structures','Hash maps, queues, arrays and trees. Hashing, caching, indexes and queues all reuse them.'],['Basic SQL','SELECT, JOIN and what a table is. Needed for the database phase.'],['Comfort with simple arithmetic','Powers of 2 and 10, and percentages. The interview phases use quick estimates, nothing harder.']];
   shell(h('div',{class:'panel'},h('div',{class:'crumbs'},h('a',{href:'#/'},'Home'),' / Prerequisites'),h('h2',{},'Prerequisites'),h('p',{class:'lead'},'You do not need to be an expert in any of this. If one item feels shaky, spend an evening on it first and the course will go much faster.'),
