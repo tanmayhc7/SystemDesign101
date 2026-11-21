@@ -14,10 +14,13 @@ const REPO={json.dumps(repo,ensure_ascii=False)};
 {r('src/engine.js')}
 {r('src/demos0.js')}
 {r('src/demos1.js')}
+{r('src/demos2.js')}
 {r('src/data0.js')}
 {r('src/data0b.js')}
 {r('src/data1.js')}
 {r('src/data1b.js')}
+{r('src/data2.js')}
+{r('src/data2b.js')}
 window.addEventListener('hashchange',route);route();
 </script></body></html>'''
 open('index.html','w',encoding='utf-8').write(html)
