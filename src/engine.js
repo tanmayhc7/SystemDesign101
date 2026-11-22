@@ -50,7 +50,7 @@ DEMOS.steps=function(host,o){
     const V=variants[cur];const A=V.actors||o.actors;const st=V.steps;const W=720,colW=W/A.length,top=46,rowH=46,H=top+st.length*rowH+20;
     const s=svgBox(W,H);
     A.forEach((a,i)=>{const x=colW*i+colW/2;s.append(sv('rect',{x:x-colW/2+8,y:6,width:colW-16,height:28,rx:8,fill:'var(--accent-soft)',stroke:'var(--line)'}),sv('text',{x,y:25,'text-anchor':'middle','font-size':12,'font-weight':600,fill:'var(--ink)'},a),sv('line',{x1:x,y1:36,x2:x,y2:H-8,stroke:'var(--line)','stroke-dasharray':'4 4'}));});
-    st.forEach((p,i)=>{if(i>idx)return;const y=top+i*rowH+16,x1=colW*p.f+colW/2,x2=colW*p.t+colW/2,self=p.f===p.t;const cur_=i===idx;const col=p.r?'var(--g1)':p.bad?'var(--bad)':'var(--accent)';
+    st.forEach((p,i)=>{if(i>idx)return;const y=top+i*rowH+16,x1=colW*p.f+colW/2,x2=colW*p.t+colW/2,self=p.f===p.t;const cur_=i===idx;const col=p.r?'var(--go)':p.bad?'var(--bad)':'var(--accent)';
       const g=sv('g',{class:cur_?'fade':''});
       if(self){g.append(sv('path',{d:`M${x1} ${y-8} h34 v16 h-34`,fill:'none',stroke:col,'stroke-width':cur_?2.6:1.6,'marker-end':'url(#ar)'}),sv('text',{x:x1+40,y:y+4,'font-size':11.5,fill:'var(--ink)'},`${i+1}. ${p.m}`));}
       else{const dir=x2>x1?1:-1;g.append(sv('line',{x1,y1:y,x2:x2-dir*4,y2:y,stroke:col,'stroke-width':cur_?2.6:1.6,'stroke-dasharray':p.r?'6 4':null,'marker-end':'url(#ar)'}),sv('text',{x:(x1+x2)/2,y:y-6,'text-anchor':'middle','font-size':11.5,fill:'var(--ink)','font-weight':cur_?700:500},`${i+1}. ${p.m}`));}
