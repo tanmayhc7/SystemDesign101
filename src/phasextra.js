@@ -85,9 +85,68 @@ const PHASE_EXTRA={
  mid:[
  {q:'What is the difference between a monolith and microservices, and what are the pros and cons of each?',lvl:'Mid',cover:['Monolith: one deployable; simple development, testing, debugging and deployment; harder for many teams and scales as one unit.','Microservices: independently deployed services per capability with own data; team independence and separate scaling; network latency, partial failures and operational overhead.','Modular monolith as a middle ground.','Choice depends on team size and needs.'],pitfalls:['Saying microservices are always better.']},
  {q:'What does it mean for a web server to be stateless, and why does it matter?',lvl:'Mid',cover:['No per-user data kept in server memory between requests.','State in a database, cache or signed token.','Any server can handle any request: easy horizontal scaling, safe restarts and deploys.','Load balancers need no sticky sessions.'],pitfalls:['Confusing stateless servers with having no database.']},
- {q:'When would you choose serverless functions for a feature, and when would you avoid them?',lvl:'Mid',cover:['Choose for event-triggered, spiky or infrequent work, glue code, scheduled jobs.','Avoid for latency-critical paths sensitive to cold starts, long-running jobs, steady high traffic, or heavy relational database connections.','Mention idempotency and statelessness.'],pitfalls:['Ignoring cold starts and limits.']}]}
+ {q:'When would you choose serverless functions for a feature, and when would you avoid them?',lvl:'Mid',cover:['Choose for event-triggered, spiky or infrequent work, glue code, scheduled jobs.','Avoid for latency-critical paths sensitive to cold starts, long-running jobs, steady high traffic, or heavy relational database connections.','Mention idempotency and statelessness.'],pitfalls:['Ignoring cold starts and limits.']}]},
+8:{quiz:[
+ {q:'Which pairing is right?',o:['Strong consistency for like counts','Strong consistency for seat reservations; eventual for view counts','Eventual consistency for bank transfers'],a:1,why:'Choose per data type by the cost of being wrong.'},
+ {q:'Batching requests mostly improves:',o:['Latency of each request','Throughput, at some cost to per-request latency','Consistency'],a:1,why:'Fixed costs are shared across the batch while items wait to fill it.'},
+ {q:'A one-way live feed of updates to browsers is simplest with:',o:['WebSockets','Server-sent events','Long polling every 10 ms'],a:1,why:'SSE is one-way over HTTP with automatic reconnection.'},
+ {q:'Concurrency (not parallelism) is what helps most when:',o:['Work is CPU-bound on many cores','Work spends most of its time waiting on I/O','There is no waiting at all'],a:1,why:'Interleaving fills the waiting time.'},
+ {q:'Celebrity posts in a social feed are usually handled by:',o:['Push into every follower timeline','Pull at read time, merged with pushed posts from others','Email'],a:1,why:'Hybrid fan-out avoids write storms.'},
+ {q:'Which API style is usually best for internal service-to-service calls with strict latency budgets?',o:['REST with verbose JSON','gRPC with Protocol Buffers','SOAP'],a:1,why:'Compact, typed, generated clients and deadlines.'}],
+ mid:[
+ {q:'Explain the difference between strong and eventual consistency with one example of each.',lvl:'Mid',cover:['Definitions.','Bank balance vs like count.','Middle guarantees like read-your-writes.'],pitfalls:['Saying eventual consistency means data can be lost.']},
+ {q:'When would you choose asynchronous messaging over a synchronous API call?',lvl:'Mid',cover:['When the caller does not need the result now.','To absorb load and survive outages.','Costs: eventual consistency, duplicates.'],pitfalls:['Using queues for queries that need immediate answers.']}]},
+9:{quiz:[
+ {q:'What should you do in the first five minutes of a design interview?',o:['Draw the architecture','Clarify requirements, scope and scale','Write code'],a:1,why:'Scope decides everything that follows.'},
+ {q:'1 billion requests per day is about:',o:['1,000 per second','12,000 per second','1 million per second'],a:1,why:'1e9 / 86,400 is about 11,600.'},
+ {q:'Where should most of the interview time go?',o:['Requirements','Deep dives on the hardest parts','Naming technologies'],a:1,why:'Depth on hard parts separates levels.'},
+ {q:'What does 99.99% availability allow per year?',o:['About 8.8 hours','About 53 minutes','About 5 minutes'],a:1,why:'0.01% of 525,600 minutes.'},
+ {q:'Which component usually comes first when a single-server app starts struggling?',o:['Sharding','Moving the database to its own machine and tuning queries','Multi-region'],a:1,why:'Cheap, simple steps first.'},
+ {q:'In the order flow, which pattern makes a double tap on "Buy" safe?',o:['CDN','Idempotency key','Gossip'],a:1,why:'The server recognises the repeated request.'}],
+ mid:[
+ {q:'Estimate QPS and storage for a service with 20 million daily users who each create 5 records of 2 KB.',lvl:'Mid',cover:['100 million writes a day, about 1,200 per second average, about 3,600 peak.','200 GB per day, about 73 TB per year before replication.','What the numbers imply.'],pitfalls:['No unit conversions shown.']},
+ {q:'Describe the steps you follow in a system design interview and how long each takes.',lvl:'Mid',cover:['Clarify, estimate, API and data, high-level, deep dives, wrap up.','Rough minutes per step.'],pitfalls:['Skipping requirements.']}]},
+10:{quiz:[
+ {q:'A URL shortener is mostly:',o:['Write-heavy','Read-heavy key-value lookups','CPU-bound'],a:1,why:'Redirects vastly outnumber new links.'},
+ {q:'In a Dynamo-style store with N=3, R=2, W=2:',o:['Reads may miss the latest write','A read overlaps the latest successful write','Writes need all replicas'],a:1,why:'R + W > N.'},
+ {q:'Where should password checks get their slowness from?',o:['Sleep calls','Adaptive hashes such as Argon2 or bcrypt','Network latency'],a:1,why:'Slow, salted hashing resists brute force.'},
+ {q:'A vending machine design is best modelled as:',o:['A sharded database','A state machine','A message queue'],a:1,why:'Behaviour depends on the current state.'},
+ {q:'Snowflake ids give you:',o:['Random, unordered ids','Unique, roughly time-ordered 64-bit ids without coordination per id','Globally strictly ordered ids'],a:1,why:'Timestamp, machine and sequence bits.'},
+ {q:'Top 10 of a leaderboard sharded by player is found by:',o:['Reading one shard','Merging each shard\'s top 10','Sorting all players'],a:1,why:'The global top is within the shard tops.'}],
+ mid:[
+ {q:'Pick one easy problem and walk through the full framework in 30 minutes.',lvl:'Mid',cover:['Requirements, estimates, API, data model, high-level design, one deep dive.'],pitfalls:['Running out of time before the design.']},
+ {q:'What is the difference between a cache and a key-value store in these designs?',lvl:'Mid',cover:['Cache: copy, may lose data, eviction and TTL.','KV store: source of truth, replicated and durable.'],pitfalls:['Treating a cache as durable storage.']}],
+ extra:[
+ {q:'Compare the URL shortener, the distributed cache and the KV store: what do they share and where do they differ?',cover:['All key-based lookups with partitioning.','Durability and consistency requirements differ.','Different write and read patterns.'],pitfalls:['Treating them as the same system.']},
+ {q:'Design an authentication system that also issues tokens for 200 internal services and rotates signing keys without downtime.',lvl:'Staff+',cover:['JWKS with key ids; overlap periods.','Short-lived tokens; refresh tokens revocable.','Rollout and monitoring of rotation.'],pitfalls:['Single key with no rotation plan.']}]},
+11:{quiz:[
+ {q:'In a chat system, why store a message before delivering it?',o:['Speed','So it is not lost if the recipient is offline or a server fails','Encryption'],a:1,why:'Store then deliver makes delivery retryable.'},
+ {q:'Photos in Instagram should be stored in:',o:['The relational database','Object storage, served through a CDN','Redis'],a:1,why:'Large blobs belong in object storage.'},
+ {q:'Votes on Reddit are processed asynchronously mainly to:',o:['Hide votes','Absorb bursts and avoid hot-key contention','Save disk'],a:1,why:'Counts can lag a little.'},
+ {q:'A payment call times out. The payment service should:',o:['Charge again','Query the processor for the outcome','Assume failure'],a:1,why:'The charge may have succeeded.'},
+ {q:'Multi-tenant platforms isolate tenants with:',o:['One shared database for all','Pods or shards with per-tenant limits','Separate code per tenant'],a:1,why:'Limits blast radius and noisy neighbours.'},
+ {q:'A rate limiter shared across many gateways keeps counters in:',o:['Each gateway\'s memory only','A fast shared store with atomic updates','A relational database'],a:1,why:'Consistent limits across servers.'}],
+ mid:[
+ {q:'Design a simple news feed for 1 million users.',lvl:'Mid',cover:['Posts, follows, feed generation.','Push or pull at this scale.','Caching.'],pitfalls:['No data model.']},
+ {q:'Design a notification service that sends email and push.',lvl:'Mid',cover:['API, queue, workers, providers.','Retries and preferences.'],pitfalls:['Synchronous sends.']}],
+ extra:[
+ {q:'Choose two medium problems with opposite consistency needs and explain how the designs differ because of it.',cover:['For example a digital wallet (strong) and a social feed (eventual).','Storage, transactions, caching and failure handling differences.'],pitfalls:['Same design for both.']},
+ {q:'Design Instagram, Twitter and Reddit as one platform team: which shared components would you build and why?',lvl:'Staff+',cover:['Shared: media pipeline, feed infrastructure, counters, notifications, search.','Product-specific ranking and models.','Ownership and APIs between platform and product teams.'],pitfalls:['Building everything three times.']}]},
+12:{quiz:[
+ {q:'Nearby businesses are found efficiently with:',o:['Distance to every business','Geohash, quadtree or S2 cells','A hash of the business name'],a:1,why:'Spatial indexes narrow the search to a few cells.'},
+ {q:'Two users typing at the same spot in a shared document converge thanks to:',o:['Locking the document','Operational transformation or CRDTs','Last-write-wins'],a:1,why:'They reconcile concurrent operations.'},
+ {q:'File sync tools upload only changed parts of a file by:',o:['Compressing the whole file','Splitting files into content-hashed chunks','Uploading at night'],a:1,why:'Unchanged chunks already exist on the server.'},
+ {q:'Seat holds in ticketing must be:',o:['Eventually consistent','Atomic and expiring','Cached only'],a:1,why:'No double selling, and abandoned holds are released.'},
+ {q:'Object stores reach very high durability with:',o:['One copy on a big disk','Erasure coding across failure domains plus scrubbing','Backups once a year'],a:1,why:'Redundancy plus continuous repair.'},
+ {q:'A stock exchange matching engine is single-threaded per symbol to:',o:['Save money','Stay deterministic and lock-free','Simplify the UI'],a:1,why:'Same input order, same output, enabling replicas by replay.'}],
+ mid:[
+ {q:'Design the seat booking flow for a cinema.',lvl:'Mid',cover:['Seats per show; atomic holds with expiry; payment.'],pitfalls:['Check-then-book races.']},
+ {q:'Explain how Dropbox-style sync detects and uploads changes.',lvl:'Mid',cover:['Chunk hashes; missing chunk upload; metadata commit; notifications.'],pitfalls:['Uploading whole files.']}],
+ extra:[
+ {q:'Pick a hard problem and identify its single hardest part, then present three options for it with trade-offs.',cover:['For example matching in Uber, merge in Google Docs, holds in ticketing.','Options, costs, choice.'],pitfalls:['Spreading time evenly over all components.']},
+ {q:'Design Uber and DoorDash as one logistics platform: which parts are shared and which differ?',lvl:'Staff+',cover:['Shared: location ingestion, geo index, ETA, payments, notifications.','Different: matching vs dispatch with prep times and batching.','Organisational ownership and platform APIs.'],pitfalls:['Treating them as identical.']}]}
 };
 const LVL_ORDER={Mid:0,Senior:1,'Staff+':2};
 Object.keys(PHASE_EXTRA).forEach(k=>{const p=PHASES[+k];if(!p)return;const x=PHASE_EXTRA[k];
   if(x.quiz)p.quiz=x.quiz;
-  p.iq=[...(x.mid||[]),...(p.iq||[])].sort((a,b)=>LVL_ORDER[a.lvl||'Senior']-LVL_ORDER[b.lvl||'Senior']);});
+  p.iq=[...(x.mid||[]),...(p.iq||[]),...(x.extra||[])].sort((a,b)=>LVL_ORDER[a.lvl||'Senior']-LVL_ORDER[b.lvl||'Senior']);});

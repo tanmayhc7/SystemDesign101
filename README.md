@@ -22,9 +22,15 @@ An interactive introduction to system design. Explore how systems scale, stay av
 
 **Architectural Patterns** (five lessons) covers client-server, microservices (with the modular monolith and hexagonal architecture), serverless, event-driven architecture (with sagas, event sourcing and CQRS), and peer-to-peer. The demos let you lose sessions on a stateful server, compare a monolith with microservices as teams grow, weigh function costs against always-on servers, run a saga with compensations, replay an event-sourced account, and compare one server with a swarm of peers distributing a file.
 
+**System Design Tradeoffs** (twelve lessons) puts the recurring choices side by side: vertical vs horizontal scaling, concurrency vs parallelism, long polling vs WebSockets, batch vs stream, stateful vs stateless, strong vs eventual consistency, read-through vs write-through caching, push vs pull, REST vs RPC, sync vs async, and latency vs throughput.
+
+**Interview Framework** (four lessons) covers a six-step answer plan with a time planner, back-of-the-envelope estimation with a calculator, scaling from one server to millions, and one order followed through every pattern in the course.
+
+**Interview Problems** (52 designs in three lines: 12 easy, 26 medium, 14 hard) covers the 45 problems in the source list plus seven from the System Design Interview books (unique IDs, leaderboard, nearby friends, hotel reservations, email, ad click aggregation, stock exchange). Each problem walks the same route: clarify with question cards, estimate with sliders, build the architecture by picking components, then the in-depth design, deep dives and interview questions.
+
 Every built phase ends with a six-question end-of-line quiz, and its interview questions come at three levels: mid, senior, and Staff+.
 
-The course map shows 5 more planned phases, from databases through distributed systems and interview problems. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) is already available and collects books, courses, engineering articles, and papers.
+All 13 lines of the course map are built. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) collects books, courses, engineering articles, and papers.
 
 Your quiz progress is saved in your browser. You can export or import it from the [Progress page](https://tanmayhc7.github.io/SystemDesign101/#/about).
 
