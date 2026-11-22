@@ -1,64 +1,72 @@
+<div align="center">
+
 # sysDesign101
 
-An interactive introduction to system design. Explore how systems scale, stay available, and handle failures through browser-based demos, short explanations, and quizzes.
+**Learn system design by riding the route: 13 lines, 124 stations, one interactive demo at every stop.**
 
-**[Open the course](https://tanmayhc7.github.io/SystemDesign101/)** · [Start Core Concepts](https://tanmayhc7.github.io/SystemDesign101/#/p/0) · [Check prerequisites](https://tanmayhc7.github.io/SystemDesign101/#/prereq)
+[![Open the course](https://img.shields.io/badge/Open_the_course-FFD43B?style=for-the-badge)](https://tanmayhc7.github.io/SystemDesign101/)
+[![Start Core Concepts](https://img.shields.io/badge/Start_Core_Concepts-1747C7?style=for-the-badge)](https://tanmayhc7.github.io/SystemDesign101/#/p/0)
+[![Interview problems](https://img.shields.io/badge/52_interview_problems-C2255C?style=for-the-badge)](https://tanmayhc7.github.io/SystemDesign101/#/p/10)
 
-## What you can learn today
+![124 lessons](https://img.shields.io/badge/lessons-124-0E1B2E?style=flat-square)
+![No sign-up](https://img.shields.io/badge/account-not_needed-0B7A5E?style=flat-square)
+![Static site](https://img.shields.io/badge/build-one_HTML_file-1864AB?style=flat-square)
+![License GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-862E9C?style=flat-square)
 
-**Core Concepts** (nine lessons) covers scalability, availability, reliability, single points of failure, latency and throughput, consistent hashing, the CAP theorem, failover, and fault tolerance.
+<a href="https://tanmayhc7.github.io/SystemDesign101/"><img src="docs/route-map.png" alt="The sysDesign101 transit map: 13 coloured lines from Core Concepts to Hard interview problems, with a station for each lesson" width="820"></a>
 
-**Networking Fundamentals** (eight lessons) covers the OSI model, IP addresses and CIDR, DNS, proxies and reverse proxies, HTTP and HTTPS, TCP and UDP, load balancing, and checksums. Each lesson has an interactive demo, an in-depth section, quiz questions, and senior-level interview questions.
+</div>
 
-**API Fundamentals** (eight lessons) covers APIs and HTTP methods, API gateways, REST vs GraphQL, WebSockets, webhooks, idempotency, rate limiting, and API design. The demos let you send a request twice and watch what happens, compare round trips with and without a gateway, count the cost of polling against WebSockets, replay a payment whose reply was lost, and run three rate limiting algorithms on the same traffic.
+## The route
 
-**Database Fundamentals** (nine lessons) covers database types, ACID transactions, SQL vs NoSQL, scaling, indexes, partitioning, sharding, replication, and Bloom filters. The demos let you crash a transfer mid-way, see lost updates, compare scan and index cost as a table grows, watch how many keys move when a shard is added, and lose acknowledged writes to asynchronous replication.
+| | Line | Stations | Highlights |
+|:-:|---|:-:|---|
+| ![0](https://img.shields.io/badge/0-D9381E?style=flat-square) | [Core Concepts](https://tanmayhc7.github.io/SystemDesign101/#/p/0) | 9 | Scalability, availability, CAP, consistent hashing |
+| ![1](https://img.shields.io/badge/1-B45309?style=flat-square) | [Networking](https://tanmayhc7.github.io/SystemDesign101/#/p/1) | 8 | DNS, HTTP/HTTPS, TCP vs UDP, load balancing |
+| ![2](https://img.shields.io/badge/2-8A6A00?style=flat-square) | [APIs](https://tanmayhc7.github.io/SystemDesign101/#/p/2) | 8 | Gateways, REST vs GraphQL, idempotency, rate limiting |
+| ![3](https://img.shields.io/badge/3-4D7C0F?style=flat-square) | [Databases](https://tanmayhc7.github.io/SystemDesign101/#/p/3) | 9 | ACID, indexes, sharding, replication, Bloom filters |
+| ![4](https://img.shields.io/badge/4-0B7A5E?style=flat-square) | [Caching](https://tanmayhc7.github.io/SystemDesign101/#/p/4) | 5 | Strategies, eviction, distributed caches, CDNs |
+| ![5](https://img.shields.io/badge/5-0B7285?style=flat-square) | [Async Messaging](https://tanmayhc7.github.io/SystemDesign101/#/p/5) | 4 | Pub/sub, queues, Kafka-style logs, CDC and the outbox |
+| ![6](https://img.shields.io/badge/6-1864AB?style=flat-square) | [Distributed Systems](https://tanmayhc7.github.io/SystemDesign101/#/p/6) | 8 | Consensus, locking, gossip, circuit breakers, tracing |
+| ![7](https://img.shields.io/badge/7-3B5BDB?style=flat-square) | [Architecture Patterns](https://tanmayhc7.github.io/SystemDesign101/#/p/7) | 5 | Microservices, serverless, sagas, CQRS, P2P |
+| ![8](https://img.shields.io/badge/8-862E9C?style=flat-square) | [Tradeoffs](https://tanmayhc7.github.io/SystemDesign101/#/p/8) | 12 | Strong vs eventual, push vs pull, batch vs stream |
+| ![9](https://img.shields.io/badge/9-C2255C?style=flat-square) | [Interview Framework](https://tanmayhc7.github.io/SystemDesign101/#/p/9) | 4 | Six-step answer, estimation calculator, zero to millions |
+| ![10](https://img.shields.io/badge/10-E64980?style=flat-square) | [Problems: Easy](https://tanmayhc7.github.io/SystemDesign101/#/p/10) | 12 | URL shortener, KV store, authentication, UPI |
+| ![11](https://img.shields.io/badge/11-A61E4D?style=flat-square) | [Problems: Medium](https://tanmayhc7.github.io/SystemDesign101/#/p/11) | 26 | WhatsApp, Instagram, rate limiter, payments, Kafka |
+| ![12](https://img.shields.io/badge/12-7A1538?style=flat-square) | [Problems: Hard](https://tanmayhc7.github.io/SystemDesign101/#/p/12) | 14 | Uber, Google Docs, Zoom, S3, a stock exchange |
 
-**Caching Fundamentals** (five lessons) covers caching basics, caching strategies, eviction policies, distributed caching, and CDNs. The demos let you size a cache against skewed traffic, lose a write-back buffer in a crash, replay one trace against FIFO, LRU and LFU, knock out a cache node and watch the database overload, and compare page latency from four regions with and without a CDN.
+## At every station
 
-**Asynchronous Communication** (four lessons) covers pub/sub, message queues, message brokers, and change data capture, plus load leveling, competing consumers, dead letter queues, and the transactional outbox. The demos let you take a subscriber down with and without a topic, push a traffic spike through a queue and inject a poison message, compare a queue with a replayable log, see at-most-once versus at-least-once delivery, and crash between a database write and an event publish.
+- **Play with it.** An interactive demo: crash a replica, trigger a retry storm, shard a table, or build an architecture by picking components.
+- **Go deeper.** A short lesson, an in-depth section, key terms, and prerequisites.
+- **Check yourself.** A two-question quiz, plus a six-question quiz at the end of each line.
+- **Prepare for interviews.** Questions at Mid, Senior, and Staff+ levels, with what a strong answer covers and the usual pitfalls.
 
-**Distributed Systems and Microservices** (eight lessons) covers heartbeats, service discovery, consensus, distributed locking, gossip, circuit breakers (with timeouts, retries, bulkheads and fallbacks), disaster recovery, and distributed tracing. The demos let you trade detection speed for false alarms, crash an instance behind a stale client cache, partition a Raft leader away from the majority, watch a paused lock holder corrupt a file without a fencing token, spread a rumour through a cluster, trigger a retry storm, pick a DR strategy from RPO and RTO targets, and read a trace waterfall.
+Every interview problem follows the same route: **clarify** with question cards, **estimate** with sliders, **build** the architecture, then **deep dive** into the hard parts.
 
-**Architectural Patterns** (five lessons) covers client-server, microservices (with the modular monolith and hexagonal architecture), serverless, event-driven architecture (with sagas, event sourcing and CQRS), and peer-to-peer. The demos let you lose sessions on a stateful server, compare a monolith with microservices as teams grow, weigh function costs against always-on servers, run a saga with compensations, replay an event-sourced account, and compare one server with a swarm of peers distributing a file.
-
-**System Design Tradeoffs** (twelve lessons) puts the recurring choices side by side: vertical vs horizontal scaling, concurrency vs parallelism, long polling vs WebSockets, batch vs stream, stateful vs stateless, strong vs eventual consistency, read-through vs write-through caching, push vs pull, REST vs RPC, sync vs async, and latency vs throughput.
-
-**Interview Framework** (four lessons) covers a six-step answer plan with a time planner, back-of-the-envelope estimation with a calculator, scaling from one server to millions, and one order followed through every pattern in the course.
-
-**Interview Problems** (52 designs in three lines: 12 easy, 26 medium, 14 hard) covers the 45 problems in the source list plus seven from the System Design Interview books (unique IDs, leaderboard, nearby friends, hotel reservations, email, ad click aggregation, stock exchange). Each problem walks the same route: clarify with question cards, estimate with sliders, build the architecture by picking components, then the in-depth design, deep dives and interview questions.
-
-Every built phase ends with a six-question end-of-line quiz, and its interview questions come at three levels: mid, senior, and Staff+.
-
-All 13 lines of the course map are built. The [resource library](https://tanmayhc7.github.io/SystemDesign101/#/library) collects books, courses, engineering articles, and papers.
-
-Your quiz progress is saved in your browser. You can export or import it from the [Progress page](https://tanmayhc7.github.io/SystemDesign101/#/about).
+Progress, XP, and streaks stay in your browser. Export or import them from the [Progress page](https://tanmayhc7.github.io/SystemDesign101/#/about).
 
 ## Run locally
 
-Start a local server with Python 3 from the repository root.
-
 ```sh
-python3 -m http.server --bind 127.0.0.1 8000
+python3 -m http.server --bind 127.0.0.1 8000   # open http://127.0.0.1:8000
+python3 build.py                               # rebuild index.html after editing src/
 ```
 
-Open [localhost:8000](http://127.0.0.1:8000/). The repository includes the generated page, so you can preview it immediately. Run the build again after editing the sources.
-
-```sh
-python3 build.py
-```
-
-## Project structure
+<details>
+<summary><b>Project structure and adding a lesson</b></summary>
 
 | Path | Purpose |
 | --- | --- |
-| [`src/`](src/) | Course data, demos, routing, quizzes, and styles |
-| [`build.py`](build.py) | Combines the sources and topic data into the static site |
-| [`index.html`](index.html) | Generated page served by GitHub Pages |
-| [`repo.json`](repo.json) and [`parse_repo.py`](parse_repo.py) | Topic catalog and the script that generates it |
+| [`src/`](src/) | Lesson data, demos, routing, quizzes, and styles |
+| [`build.py`](build.py) | Combines the sources and topic data into one static page |
+| [`index.html`](index.html) | The generated page served by GitHub Pages |
+| [`repo.json`](repo.json), [`parse_repo.py`](parse_repo.py) | Topic catalog and the script that generates it |
 
-To add a lesson, register its demo in the matching `src/demosN.js` file and use `lesson(phaseIndex, definition)` in the course data. Match the lesson’s `key` to the upstream topic title so the app can find its source link and any linked video. Use `ctx.every` for recurring demo timers so they stop when the learner leaves the page. Rebuild `index.html` after editing the sources.
+Register a demo in `src/demosN.js`, then call `lesson(phaseIndex, definition)` in the course data. Match the lesson `key` to the upstream topic title so its source link and video are found. Use `ctx.every` for recurring timers so they stop when the learner leaves. Rebuild `index.html` afterwards.
 
-## Credits and license
+</details>
 
-sysDesign101 is an independent companion to [Awesome System Design Resources](https://github.com/ashishps1/awesome-system-design-resources). Demo numbers are illustrative. This repository includes the [GNU GPL v3 license](LICENSE).
+## Credits
+
+An independent companion to [Awesome System Design Resources](https://github.com/ashishps1/awesome-system-design-resources). Demo numbers are illustrative. Licensed under the [GNU GPL v3](LICENSE).
