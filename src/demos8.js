@@ -30,7 +30,7 @@ DEMOS.problem=function(host,o){
   const view=h('div');const names=['1. Clarify','2. Estimate','3. Build'];if(o.flow)names.push('4. Walk a request');
   const t=tabs(names,i=>{view.textContent='';if(i===0)clar();else if(i===1)est();else if(i===2)DEMOS.design(view,o.build);else DEMOS.steps(view,o.flow);},0);
   function clar(){view.append(h('div',{class:'note'},'Before drawing anything, ask. Think of your own answer to each question, then flip the card for why it matters and the assumption used here.'));DEMOS.flip(view,{cards:o.clarify.map(([q,a])=>({f:q,b:a})),prompt:' '});}
-  function est(){if(!o.est){view.append(h('div',{class:'takeaway'},o.noest||'This problem is about modelling and correctness, not scale. Spend the time on entities, states and rules instead of traffic numbers.'));return;}estimator(view,o.est);}
+  function est(){if(o.tok){tokenEst(view,o.tok);return;}if(!o.est){view.append(h('div',{class:'takeaway'},o.noest||'This problem is about modelling and correctness, not scale. Spend the time on entities, states and rules instead of traffic numbers.'));return;}estimator(view,o.est);}
   host.append(t,view);clar();
 };
 
