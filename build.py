@@ -21,6 +21,7 @@ const REPO={json.dumps(repo,ensure_ascii=False)};
 {r('src/demos6.js')}
 {r('src/demos7.js')}
 {r('src/demos8.js')}
+{r('src/demos9.js')}
 {r('src/data0.js')}
 {r('src/data0b.js')}
 {r('src/data1.js')}
@@ -46,6 +47,10 @@ const REPO={json.dumps(repo,ensure_ascii=False)};
 {r('src/data11.js')}
 {r('src/data11b.js')}
 {r('src/data12.js')}
+{r('src/data13.js')}
+{r('src/data13b.js')}
+{r('src/data14.js')}
+{r('src/data14b.js')}
 {r('src/phasextra.js')}
 window.addEventListener('hashchange',route);route();
 </script></body></html>'''

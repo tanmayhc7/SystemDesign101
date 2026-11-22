@@ -2,18 +2,18 @@
 
 # sysDesign101
 
-**Learn system design by riding the route: 13 lines, 124 stations, one interactive demo at every stop.**
+**Learn system design by riding the route: 15 lines, 148 stations, one interactive demo at every stop.**
 
 [![Open the course](https://img.shields.io/badge/Open_the_course-FFD43B?style=for-the-badge)](https://tanmayhc7.github.io/SystemDesign101/)
 [![Start Core Concepts](https://img.shields.io/badge/Start_Core_Concepts-1747C7?style=for-the-badge)](https://tanmayhc7.github.io/SystemDesign101/#/p/0)
 [![Interview problems](https://img.shields.io/badge/52_interview_problems-C2255C?style=for-the-badge)](https://tanmayhc7.github.io/SystemDesign101/#/p/10)
 
-![124 lessons](https://img.shields.io/badge/lessons-124-0E1B2E?style=flat-square)
+![148 lessons](https://img.shields.io/badge/lessons-148-0E1B2E?style=flat-square)
 ![No sign-up](https://img.shields.io/badge/account-not_needed-0B7A5E?style=flat-square)
 ![Static site](https://img.shields.io/badge/build-one_HTML_file-1864AB?style=flat-square)
 ![License GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-862E9C?style=flat-square)
 
-<a href="https://tanmayhc7.github.io/SystemDesign101/"><img src="docs/route-map.png" alt="The sysDesign101 transit map: 13 coloured lines from Core Concepts to Hard interview problems, with a station for each lesson" width="820"></a>
+<a href="https://tanmayhc7.github.io/SystemDesign101/"><img src="docs/route-map.png" alt="The sysDesign101 transit map: 15 coloured lines from Core Concepts to AI interview problems, with a station for each lesson" width="820"></a>
 
 </div>
 
@@ -34,6 +34,8 @@
 | ![10](https://img.shields.io/badge/10-E64980?style=flat-square) | [Problems: Easy](https://tanmayhc7.github.io/SystemDesign101/#/p/10) | 12 | URL shortener, KV store, authentication, UPI |
 | ![11](https://img.shields.io/badge/11-A61E4D?style=flat-square) | [Problems: Medium](https://tanmayhc7.github.io/SystemDesign101/#/p/11) | 26 | WhatsApp, Instagram, rate limiter, payments, Kafka |
 | ![12](https://img.shields.io/badge/12-7A1538?style=flat-square) | [Problems: Hard](https://tanmayhc7.github.io/SystemDesign101/#/p/12) | 14 | Uber, Google Docs, Zoom, S3, a stock exchange |
+| ![13](https://img.shields.io/badge/13-0E7490?style=flat-square) | [AI System Design](https://tanmayhc7.github.io/SystemDesign101/#/p/13) | 10 | LLM inference, batching, RAG, vector search, agents, guardrails, evals |
+| ![14](https://img.shields.io/badge/14-5F3DC4?style=flat-square) | [AI Interview Problems](https://tanmayhc7.github.io/SystemDesign101/#/p/14) | 14 | Enterprise RAG, support and code review agents, inference serving, voice |
 
 ## At every station
 

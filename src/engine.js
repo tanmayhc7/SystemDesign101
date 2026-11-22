@@ -117,7 +117,7 @@ function header(){const t=totals();return h('div',{class:'top'},h('a',{class:'br
 function shell(...kids){clearTimers();root.textContent='';const w=h('div',{class:'wrap'},header(),...kids);root.append(w);window.scrollTo&&window.scrollTo(0,0);document.title=siteName;return w;}
 const gv=(i,k)=>`var(--g${GROUP(i)}${k||''})`;
 
-const ABBR=['Core Concepts','Networking','APIs','Databases','Caching','Async Messaging','Distributed Systems','Architecture Patterns','Tradeoffs','Interview Framework','Problems: Easy','Problems: Medium','Problems: Hard'];
+const ABBR=['Core Concepts','Networking','APIs','Databases','Caching','Async Messaging','Distributed Systems','Architecture Patterns','Tradeoffs','Interview Framework','Problems: Easy','Problems: Medium','Problems: Hard','AI Concepts','AI Problems'];
 const lineVars=i=>`--lc:var(--l${i});--lt:var(--t${i})`;
 let introPlayed=false;
 function polyAt(pts,d){let acc=0;for(let k=0;k<pts.length-1;k++){const [ax,ay]=pts[k],[bx,by]=pts[k+1],L=Math.hypot(bx-ax,by-ay);if(d<=acc+L||k===pts.length-2){const t=Math.min(1,(d-acc)/L);return [ax+(bx-ax)*t,ay+(by-ay)*t];}acc+=L;}return pts[pts.length-1];}
