@@ -155,9 +155,9 @@ function viewHome(q){
     legend.append(h('a',{class:'lg',href:'#/p/'+p.i,style:lineVars(p.i)},h('span',{class:'roundel','aria-hidden':'true'},String(p.i)),h('span',{class:'tx'},h('b',{},p.name),meter(p.lessons.length?100*d/p.lessons.length:0),h('span',{class:'cnt'},p.lessons.length?`${d} of ${p.lessons.length} stations done`:`Planned: ${n} topic${n>1?'s':''}`)))); });
   legend.append(h('a',{class:'lg',href:'#/library',style:'--lc:var(--accent);--lt:var(--on-accent)'},h('span',{class:'roundel','aria-hidden':'true'},'L'),h('span',{class:'tx'},h('b',{},'Library'),h('span',{class:'cnt'},'Courses, books, channels, papers'))));
   const lh=h('h3',{},'All lines');
-  const built=t.d, total=PHASES.length, first=PHASES.find(p=>p.lessons.length);
+  const built=PHASES.filter(p=>p.lessons.length).length, total=PHASES.length, first=PHASES.find(p=>p.lessons.length);
   const heroStats=h('div',{class:'hero-stats'},
-    h('div',{class:'hero-stat'},h('b',{},String(built)),h('span',{},'stations live')),
+    h('div',{class:'hero-stat'},h('b',{},String(LESSONS.length)),h('span',{},'stations live')),
     h('div',{class:'hero-stat'},h('b',{},String(total)),h('span',{},'lines mapped')),
     h('div',{class:'hero-stat'},h('b',{},'No'),h('span',{},'account needed'))
   );
